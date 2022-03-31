@@ -20,6 +20,9 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private PlayerMovement player_movement;
 
+    [SerializeField]
+    private InteractionHandler interactionHandler;
+
     // Need a class for an action
     private List<GameObject> queuedMoves;
 
@@ -31,6 +34,11 @@ public class GameManager : MonoBehaviour
     public PlayerMovement PlayerMovement
     {
         get { return player_movement; }
+    }
+
+    public InteractionHandler InteractionHandler
+    {
+        get { return interactionHandler; }
     }
 
     public List<GameObject> QueuedMoves
@@ -53,14 +61,16 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         // This is where all the gameplay handlers will go, certain ones will be called depending on what the gamestate is
+        if (state == GameState.PlayerMove)
+        {
+            interactionHandler.DoUpdate();
+            player_movement.DoUpdate();
+        }
     }
 
     private void FixedUpdate()
     {
         // Physics handlers here
-
-        if (state == GameState.PlayerMove)
-            player_movement.DoUpdate();
     }
 
     public IEnumerator WaitForMoveResolution()

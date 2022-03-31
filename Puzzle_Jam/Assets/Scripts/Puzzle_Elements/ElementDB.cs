@@ -40,6 +40,7 @@ public class ElementDB : MonoBehaviour
 
     public enum ActionIDs { NoAction, BlockMovement, PushNormal };
 
+    // On Push Table
     public List<List<int>> PushTable = new List<List<int>>
     {
         // x axis is pushee
@@ -53,5 +54,27 @@ public class ElementDB : MonoBehaviour
     public int GetPushID(int pusherID, int pushedID)
     {
         return PushTable[pusherID][pushedID];
+    }
+
+    // Can Pull Table?
+    public List<List<int>> CanPullTable = new List<List<int>>
+    {
+        // x axis is pulled
+        // y axis is puller
+
+        // -1 -> Unexpected
+        // 0  -> Cannot Push
+        // 1  -> Can Push
+        new List<int> {  1,  0,  1 }, // Player
+        new List<int> { -1, -1, -1 }, // Immovable Rock
+        new List<int> { -1, -1, -1 }, // Pushable/Pullable Rock
+    };
+
+    public bool GetCanPull(int pullerID, int pulledID)
+    {
+        bool res = false;
+        if (CanPullTable[pullerID][pulledID] == 1)
+            res = true;
+        return res;
     }
 }

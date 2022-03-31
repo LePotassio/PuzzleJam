@@ -10,9 +10,25 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField]
     private Movable movable;
 
+    private Puzzle_Element puzzleElement;
+
+    private bool isChangingDir;
+
     public Movable Movable
     {
         get { return movable; }
+    }
+
+    private void Awake()
+    {
+        isChangingDir = false;
+    }
+
+    private void Start()
+    {
+        puzzleElement = GetComponent<Puzzle_Element>();
+        if (!puzzleElement)
+            Debug.Log("WARNING: PlayerMovement was initialized on an object without a puzzle element!");
     }
 
     /// <summary>
@@ -20,33 +36,47 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     public void DoUpdate()
     {
-        if (Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.DownArrow) || Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.RightArrow))
+        if (isChangingDir)
+            return;
+
+        if (GameSettings.Instance.GetKeyBinding(KeyButtons.MoveUp) || GameSettings.Instance.GetKeyBinding(KeyButtons.MoveDown) || GameSettings.Instance.GetKeyBinding(KeyButtons.MoveLeft) || GameSettings.Instance.GetKeyBinding(KeyButtons.MoveRight))
         {
             GameManager.Instance.State = GameState.MoveStandby;
 
 
             string dir = "";
-            if (Input.GetKey(KeyCode.UpArrow))
+            if (GameSettings.Instance.GetKeyBinding(KeyButtons.MoveUp))
                 dir = "up";
-            else if (Input.GetKey(KeyCode.DownArrow))
+            else if (GameSettings.Instance.GetKeyBinding(KeyButtons.MoveDown))
                 dir = "down";
-            else if (Input.GetKey(KeyCode.LeftArrow))
+            else if (GameSettings.Instance.GetKeyBinding(KeyButtons.MoveLeft))
             {
-                sr.flipX = true;
                 dir = "left";
             }
-            else if (Input.GetKey(KeyCode.RightArrow))
+            else if (GameSettings.Instance.GetKeyBinding(KeyButtons.MoveRight))
             {
-                sr.flipX = false;
                 dir = "right";
             }
 
-            PlayerMove(dir);
+            if (!puzzleElement.ChangeFacingDirection(dir))
+                PlayerMove(dir);
+            else
+            {
+                StartCoroutine(WaitForDirectionChange());
+                GameManager.Instance.State = GameState.PlayerMove;
+            }
         }
     }
 
     public void PlayerMove(string dir)
     {   
         StartCoroutine(movable.Move(dir));
+    }
+
+    private IEnumerator WaitForDirectionChange()
+    {
+        isChangingDir = true;
+        yield return new WaitForSeconds(GameSettings.ChangeDirectionDelay);
+        isChangingDir = false;
     }
 }

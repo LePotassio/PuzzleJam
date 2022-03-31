@@ -71,7 +71,19 @@ public class Movable : MonoBehaviour
         //GridTile destTile = CheckPathClear(dirVec);
 
         // The destination was not clear or did not exist in the grid
-        if (!CheckClearRecursive(new List<Puzzle_Element>(), new List<GridTile>(), dirVec))
+        bool isClear = true;
+
+        foreach (Puzzle_Element attachedElem in puzzleElement.AttachedElements)
+        {
+            Movable attachedMov = attachedElem.GetComponent<Movable>();
+            if (!attachedMov || !attachedMov.CheckClearRecursive(new List<Puzzle_Element>(), new List<GridTile>(), dirVec))
+            {
+                isClear = false;
+                break;
+            }
+        }
+
+        if (!isClear)
         {
             // Could show invalid move here
             GameManager.Instance.State = GameState.PlayerMove;
@@ -87,9 +99,20 @@ public class Movable : MonoBehaviour
         // around here, will need to check and do any actions caused by the player's movement
 
         //yield return MoveByAmount(dirVec);
-        ProcAllMovements(dirVec);
+        //ProcAllMovements(dirVec);
+
+        foreach(Puzzle_Element attachedElem in puzzleElement.AttachedElements)
+        {
+            Movable attachedMov = attachedElem.GetComponent<Movable>();
+            attachedMov.ProcAllMovements(dirVec);
+        }
 
         yield return new WaitUntil(() => GameManager.Instance.QueuedMoves.Count == 0);
+
+        foreach (InteractionReticle r in GameManager.Instance.InteractionHandler.Reticles)
+        {
+            r.UpdateCurrentTile();
+        }
 
         // temporary
         GameManager.Instance.State = GameState.PlayerMove;
@@ -116,6 +139,7 @@ public class Movable : MonoBehaviour
         return colliders[0].GetComponent<GridTile>();
     }
 
+    // Deprocated
     private IEnumerator MoveByAmount (Vector3 dirVec)
     {
         // Move x or y amount over time by lerping
@@ -136,54 +160,56 @@ public class Movable : MonoBehaviour
 
     private bool CheckClearRecursive(List<Puzzle_Element> temps, List<GridTile> recursedTiles, Vector3 dirVec)
     {
-        var colliders = Physics2D.OverlapCircleAll(transform.position + dirVec, 0.15f, GameLayers.Instance.TileLayer);
-
-        // Base case: The tile element is moving into an out of grid tile
-        if (colliders.Length == 0)
+        foreach (Puzzle_Element attachedElem in puzzleElement.AttachedElements)
         {
-            RemoveTemps(temps);
-            return false;
-        }
+            var colliders = Physics2D.OverlapCircleAll(attachedElem.transform.position + dirVec, 0.15f, GameLayers.Instance.TileLayer);
 
-        GridTile tileToCheck = colliders[0].GetComponent<GridTile>();
-
-        bool movingPiece = false;
-        int movableIndex = -1;
-
-        // Go through contents and search for a player block
-        foreach (Puzzle_Element targetElem in tileToCheck.Contents)
-        {
-            movableIndex++;
-            // Base case: The tile element is moving into an immovable tile
-            if (puzzleElement.ElementID >= 0 && targetElem.ElementID >= 0 && ElementDB.Instance.GetPushID(puzzleElement.ElementID, targetElem.ElementID) == (int)ElementDB.ActionIDs.BlockMovement)
+            // Base case: The tile element is moving into an out of grid tile
+            if (colliders.Length == 0)
             {
                 RemoveTemps(temps);
                 return false;
             }
-            if (puzzleElement.ElementID >= 0 && targetElem.ElementID >= 0 && ElementDB.Instance.GetPushID(puzzleElement.ElementID, targetElem.ElementID) == (int)ElementDB.ActionIDs.PushNormal)
+
+            GridTile tileToCheck = colliders[0].GetComponent<GridTile>();
+
+            bool movingPiece = false;
+            int movableIndex = -1;
+
+            // Go through contents and search for a player block
+            foreach (Puzzle_Element targetElem in tileToCheck.Contents)
             {
-                movingPiece = true;
-                break;
+                movableIndex++;
+                // Base case: The tile element is moving into an immovable tile
+                if (attachedElem.ElementID >= 0 && targetElem.ElementID >= 0 && ElementDB.Instance.GetPushID(attachedElem.ElementID, targetElem.ElementID) == (int)ElementDB.ActionIDs.BlockMovement)
+                {
+                    RemoveTemps(temps);
+                    return false;
+                }
+                if (attachedElem.ElementID >= 0 && targetElem.ElementID >= 0 && ElementDB.Instance.GetPushID(attachedElem.ElementID, targetElem.ElementID) == (int)ElementDB.ActionIDs.PushNormal)
+                {
+                    movingPiece = true;
+                    break;
+                }
+            }
+
+            Movable frontMovable = null;
+            if (movingPiece)
+                frontMovable = tileToCheck.Contents[movableIndex].GetComponent<Movable>();
+
+            // Create a temporary element in the space in front
+            GameObject temp = (GameObject)Instantiate(Resources.Load("Prefabs/TempElement"), tileToCheck.transform);
+            Puzzle_Element tempElem = temp.GetComponent<Puzzle_Element>();
+            temps.Add(tempElem);
+            tileToCheck.Contents.Add(tempElem);
+            recursedTiles.Add(currentTile);
+
+            if (movingPiece && !recursedTiles.Contains(tileToCheck))
+            {
+                // CheckAndMove the element before it
+                return frontMovable.CheckClearRecursive(temps, recursedTiles, dirVec);
             }
         }
-
-        Movable frontMovable = null;
-        if (movingPiece)
-            frontMovable = tileToCheck.Contents[movableIndex].GetComponent<Movable>();
-
-        // Create a temporary element in the space in front
-        GameObject temp = (GameObject) Instantiate(Resources.Load("Prefabs/TempElement"), tileToCheck.transform);
-        Puzzle_Element tempElem = temp.GetComponent<Puzzle_Element>();
-        temps.Add(tempElem);
-        tileToCheck.Contents.Add(tempElem);
-        recursedTiles.Add(currentTile);
-
-        if (movingPiece && !recursedTiles.Contains(tileToCheck))
-        {
-            // CheckAndMove the element before it
-            return frontMovable.CheckClearRecursive(temps, recursedTiles, dirVec);
-        }
-
         // Base case: The tile element in question is pushing into an available or space occupied by a moving piece
 
         // Check no temps overlap
@@ -214,7 +240,9 @@ public class Movable : MonoBehaviour
     {
         List<(Puzzle_Element, GridTile)> removeList = new List<(Puzzle_Element, GridTile)>();
         List<(Puzzle_Element, GridTile)> addList = new List<(Puzzle_Element, GridTile)>();
-        ProcAllMovements(removeList, addList, dirVec);
+        // Some type of issue here is causing an infinite loop...
+        Movable m = puzzleElement.GetComponent<Movable>();
+        m.ProcAllMovements(removeList, addList, dirVec);
 
         foreach ((Puzzle_Element, GridTile) removePair in removeList)
         {
@@ -237,14 +265,13 @@ public class Movable : MonoBehaviour
         //if (recursedTiles.Contains(tileToCheck))
         //    return;
 
-        bool movingPiece = false;
-
         foreach (Puzzle_Element objElement in tileToCheck.Contents)
         {
             // may need loop protection here
             if (puzzleElement.ElementID >= 0 && objElement.ElementID >= 0 && ElementDB.Instance.GetPushID(puzzleElement.ElementID, objElement.ElementID) == (int)ElementDB.ActionIDs.PushNormal)
             {
-                movingPiece = true;
+                if (puzzleElement.AttachedElements.Contains(objElement))
+                    continue;
                 objElement.GetComponent<Movable>().ProcAllMovements(removeList, addList, dirVec);
             }
         }
