@@ -26,4 +26,15 @@ public class GridTile : MonoBehaviour
 
         return contents.Count > 1;
     }
+
+    public bool CheckForContentByID(int id)
+    {
+        foreach (Puzzle_Element e in contents)
+        {
+            if (e.ElementID == id)
+                return true;
+        }
+
+        return false;
+    }
 }

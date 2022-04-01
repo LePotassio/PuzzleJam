@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum GameState { PlayerMove, MoveStandby, MoveResolution, PauseMenu, TitleMenu };
+public enum GameState { PlayerMove, MoveStandby, MoveResolution, PuzzleSolved, PauseMenu, TitleMenu };
 
 /// <summary>
 /// The game manager is a singleton class that keeps track of the update loop
@@ -26,6 +26,9 @@ public class GameManager : MonoBehaviour
     // Need a class for an action
     private List<GameObject> queuedMoves;
 
+    [SerializeField]
+    private List<WinCondition> currentWinConditions;
+
     public GameObject PlayerObject
     {
         get { return playerObject; }
@@ -44,6 +47,11 @@ public class GameManager : MonoBehaviour
     public List<GameObject> QueuedMoves
     {
         get { return queuedMoves; }
+    }
+
+    public List<WinCondition> CurrentWinConditions
+    {
+        get { return currentWinConditions; }
     }
 
     public GameState State
@@ -66,6 +74,21 @@ public class GameManager : MonoBehaviour
             interactionHandler.DoUpdate();
             player_movement.DoUpdate();
         }
+        else if (state == GameState.PuzzleSolved)
+        {
+            Debug.Log("A winner is you!");
+        }
+    }
+
+    // Call this after ANY Movement or interaction that could result in a win...
+    public bool CheckAllWinConditions()
+    {
+        foreach (WinCondition winCondition in currentWinConditions)
+        {
+            if (!winCondition.CheckFullfilled())
+                return false;
+        }
+        return true;
     }
 
     private void FixedUpdate()

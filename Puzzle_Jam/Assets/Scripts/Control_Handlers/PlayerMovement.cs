@@ -58,7 +58,8 @@ public class PlayerMovement : MonoBehaviour
                 dir = "right";
             }
 
-            if (!puzzleElement.ChangeFacingDirection(dir))
+            InteractionReticle r = GetComponentInChildren<InteractionReticle>();
+            if (!puzzleElement.ChangeFacingDirection(dir) || (r && r.InteractionMode == InteractionMode.None)) // Warning: Created implicit dependency between PlayerMovement and InteractionReticle...
                 PlayerMove(dir);
             else
             {

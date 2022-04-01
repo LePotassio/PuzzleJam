@@ -27,6 +27,8 @@ public class ElementDB : MonoBehaviour
      * 0 Player
      * 1 Immovable Rock
      * 2 Pushable/Pullable Rock
+     * 3 Empty Element (NOT null)
+     * 4 Heavy Rock
     */
 
     /*
@@ -46,15 +48,19 @@ public class ElementDB : MonoBehaviour
         // x axis is pushee
         // y axis is pusher
 
-        new List<int> { -1,  1,  2 }, // Player
-        new List<int> { -1, -1, -1 }, // Immovable Rock
-        new List<int> {  2,  1,  2 }, // Pushable/Pullable Rock
+        new List<int> { -1,  1,  2, -1,  2 }, // Player
+        new List<int> { -1, -1, -1, -1, -1 }, // Immovable Rock
+        new List<int> {  2,  1,  2, -1,  1 }, // Pushable/Pullable Rock
+        new List<int> { -1, -1, -1, -1, -1 }, // Empty Element
+        new List<int> {  2,  1,  2, -1,  1 }, // Heavy Rock
     };
 
     public int GetPushID(int pusherID, int pushedID)
     {
         return PushTable[pusherID][pushedID];
     }
+
+    // Will need a table for on move next to
 
     // Can Pull Table?
     public List<List<int>> CanPullTable = new List<List<int>>
@@ -65,9 +71,11 @@ public class ElementDB : MonoBehaviour
         // -1 -> Unexpected
         // 0  -> Cannot Push
         // 1  -> Can Push
-        new List<int> {  1,  0,  1 }, // Player
-        new List<int> { -1, -1, -1 }, // Immovable Rock
-        new List<int> { -1, -1, -1 }, // Pushable/Pullable Rock
+        new List<int> {  1,  0,  1, -1,  1 }, // Player
+        new List<int> { -1, -1, -1, -1, -1 }, // Immovable Rock
+        new List<int> { -1, -1, -1, -1, -1 }, // Pushable/Pullable Rock
+        new List<int> { -1, -1, -1, -1, -1 }, // Empty Element
+        new List<int> { -1, -1, -1, -1, -1 }, // Heavy Rock
     };
 
     public bool GetCanPull(int pullerID, int pulledID)

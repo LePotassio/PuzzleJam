@@ -16,6 +16,7 @@ public class InteractionReticle : MonoBehaviour
     [SerializeField]
     private Sprite releaseReticle;
 
+    [SerializeField]
     private InteractionMode interactionMode;
 
     public Puzzle_Element AimerElement
@@ -44,9 +45,6 @@ public class InteractionReticle : MonoBehaviour
         sr = GetComponentInChildren<SpriteRenderer>();
         sr.enabled = true;
 
-        // TEMP
-        InteractionMode = InteractionMode.Pull;
-
         SwitchReticleSprite(InteractionMode);
     }
 
@@ -65,7 +63,14 @@ public class InteractionReticle : MonoBehaviour
         if (aimerElement.AttachedElements.Count != 1)
             return;
 
-        StartCoroutine(MoveReticleOverTime(newDirection));
+        if (interactionMode != InteractionMode.None)
+            StartCoroutine(MoveReticleOverTime(newDirection));
+        else
+        {
+            transform.position = aimerElement.transform.position + (Vector3)newDirection;
+            UpdateCurrentTile();
+        }
+
     }
 
     private IEnumerator MoveReticleOverTime(Vector2 newDirection)
@@ -92,7 +97,10 @@ public class InteractionReticle : MonoBehaviour
     public void UpdateCurrentTile()
     {
         var colliders = Physics2D.OverlapCircleAll(transform.position, 0.15f, GameLayers.Instance.TileLayer);
-        currentTile = colliders[0].GetComponent<GridTile>();
+        if (colliders.Length > 0)
+            currentTile = colliders[0].GetComponent<GridTile>();
+        else
+            currentTile = null;
     }
 
     public void SwitchReticleSprite(InteractionMode interactionType)

@@ -115,7 +115,11 @@ public class Movable : MonoBehaviour
         }
 
         // temporary
-        GameManager.Instance.State = GameState.PlayerMove;
+
+        if (!GameManager.Instance.CheckAllWinConditions())
+            GameManager.Instance.State = GameState.PlayerMove;
+        else
+            GameManager.Instance.State = GameState.PuzzleSolved;
     }
 
     private GridTile CheckPathClear(Vector3 dirVec)
@@ -251,6 +255,9 @@ public class Movable : MonoBehaviour
 
         foreach ((Puzzle_Element, GridTile) addPair in addList)
         {
+            WinCondition wc = addPair.Item2.GetComponent<WinCondition>();
+            if (wc)
+                wc.CheckOneTimeList(addPair.Item1.ElementID);
             addPair.Item2.Contents.Add(addPair.Item1);
         }
     }

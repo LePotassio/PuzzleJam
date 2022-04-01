@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// Depreocated, We don't need a strict gridlike structure with out architecture!
 public class PuzzleGrid : MonoBehaviour
 {
     [SerializeField]
