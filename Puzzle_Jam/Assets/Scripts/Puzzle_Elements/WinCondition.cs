@@ -11,15 +11,12 @@ public class WinCondition : MonoBehaviour
     // Determines if the objective can be one time or must be at the end
     [SerializeField]
     private List<int> oneTimeExpectedElements;
-    
 
-    private GridTile currentTile;
+    private Puzzle_Element parentElement;
 
     private void Start()
     {
-        var colliders = Physics2D.OverlapCircleAll(transform.position, 0.15f, GameLayers.Instance.TileLayer);
-        if (colliders.Length > 0)
-            currentTile = colliders[0].GetComponent<GridTile>();
+        parentElement = GetComponent<Puzzle_Element>();
         GameManager.Instance.CurrentWinConditions.Add(this);
     }
 
@@ -36,7 +33,7 @@ public class WinCondition : MonoBehaviour
 
         foreach (int expectedElement in expectedElements)
         {
-            if (!currentTile.CheckForContentByID(expectedElement))
+            if (!parentElement.CurrentTile.CheckForContentByID(expectedElement))
                 return false;
         }
 

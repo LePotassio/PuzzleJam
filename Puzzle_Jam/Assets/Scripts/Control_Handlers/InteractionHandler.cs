@@ -16,7 +16,8 @@ public class InteractionHandler : MonoBehaviour
 
     public void DoUpdate()
     {
-        foreach (InteractionReticle reticle in reticles) {
+        foreach (InteractionReticle reticle in reticles)
+        {
             if (reticle.InteractionMode == InteractionMode.None)
                 return;
 
@@ -61,6 +62,11 @@ public class InteractionHandler : MonoBehaviour
                 }
             }
         }
+    }
+
+    public void ClearInteractionHandler()
+    {
+        reticles = new List<InteractionReticle>();
     }
 
     //public enum InteractionIDs { NoInteraction, Pull, Release };

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public enum GameState { PlayerMove, MoveStandby, MoveResolution, PuzzleSolved, PauseMenu, TitleMenu };
 
@@ -15,10 +16,7 @@ public class GameManager : MonoBehaviour
     private GameState state;
 
     [SerializeField]
-    private GameObject playerObject;
-
-    [SerializeField]
-    private PlayerMovement player_movement;
+    private List<PlayerMovement> player_movements;
 
     [SerializeField]
     private InteractionHandler interactionHandler;
@@ -29,14 +27,17 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private List<WinCondition> currentWinConditions;
 
-    public GameObject PlayerObject
-    {
-        get { return playerObject; }
-    }
+    [SerializeField]
+    private FullPuzzle currentPuzzle;
 
-    public PlayerMovement PlayerMovement
+    [SerializeField]
+    private Camera mainCamera;
+
+    private bool winDelay;
+
+    public List<PlayerMovement> PlayerMovements
     {
-        get { return player_movement; }
+        get { return player_movements; }
     }
 
     public InteractionHandler InteractionHandler
@@ -54,6 +55,18 @@ public class GameManager : MonoBehaviour
         get { return currentWinConditions; }
     }
 
+    public FullPuzzle CurrentPuzzle
+    {
+        get { return currentPuzzle; }
+        set { currentPuzzle = value; }
+    }
+    
+    public bool WinDelay
+    {
+        get { return winDelay; }
+        set { winDelay = value; }
+    }
+
     public GameState State
     {
         get { return state; }
@@ -62,6 +75,7 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
+        DontDestroyOnLoad(this);
         Instance = this;
         queuedMoves = new List<GameObject>();
     }
@@ -72,17 +86,25 @@ public class GameManager : MonoBehaviour
         if (state == GameState.PlayerMove)
         {
             interactionHandler.DoUpdate();
-            player_movement.DoUpdate();
+            foreach (PlayerMovement pm in player_movements)
+                pm.DoUpdate();
         }
         else if (state == GameState.PuzzleSolved)
         {
             Debug.Log("A winner is you!");
+            // You win goes here
+
+            // Then swap back to level select
+            SwitchLevel(currentPuzzle.OnCompletionWarp.SceneToLoad);
         }
     }
 
     // Call this after ANY Movement or interaction that could result in a win...
     public bool CheckAllWinConditions()
     {
+        if (winDelay)
+            return false;
+
         foreach (WinCondition winCondition in currentWinConditions)
         {
             if (!winCondition.CheckFullfilled())
@@ -100,5 +122,36 @@ public class GameManager : MonoBehaviour
     {
         yield return new WaitUntil(() => queuedMoves.Count == 0);
         state = GameState.PlayerMove;
+    }
+
+    public void SwitchLevel(int sceneIndex)
+    {
+        Scene curScene = SceneManager.GetActiveScene();
+        // Unload old scene
+        //SceneManager.UnloadSceneAsync(curScene);
+        // Transition and camera enabling/disabling
+
+        ClearGameManager();// Keep in mind, this could lead to suspended time for handlers... would need to wait for scene to load...
+        
+        // Wait for load issue: Need to wait for all references to be setup, and cant load before unload
+
+        // Load new scene
+        SceneManager.LoadScene(sceneIndex);
+    }
+
+    public void ClearGameManager()
+    {
+        queuedMoves = new List<GameObject>();
+        player_movements = new List<PlayerMovement>();
+        currentWinConditions = new List<WinCondition>();
+        interactionHandler.ClearInteractionHandler();
+        currentPuzzle = null;
+        winDelay = true;
+        state = GameState.PlayerMove;
+    }
+
+    public void RecenterCamera(GameObject center)
+    {
+        mainCamera.transform.position = new Vector3(center.transform.position.x, center.transform.position.y, -10);
     }
 }

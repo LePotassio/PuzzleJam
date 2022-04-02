@@ -15,6 +15,8 @@ public class Movable : MonoBehaviour
     [SerializeField]
     private float moveSpeed = 3f;
 
+    private LevelSelector ls;
+
     public GameObject Player_Obj
     {
         get { return movableObj; }
@@ -41,6 +43,8 @@ public class Movable : MonoBehaviour
 
     public IEnumerator Move(string dir, int tileDistance = 1)
     {
+        GameManager.Instance.WinDelay = false;
+
         dir = dir.ToLower();
 
         if (!(dir == "up" || dir == "down" || dir == "left" || dir == "right"))
@@ -109,12 +113,12 @@ public class Movable : MonoBehaviour
 
         yield return new WaitUntil(() => GameManager.Instance.QueuedMoves.Count == 0);
 
+        ls?.ActivateLevelSelect();
+
         foreach (InteractionReticle r in GameManager.Instance.InteractionHandler.Reticles)
         {
             r.UpdateCurrentTile();
         }
-
-        // temporary
 
         if (!GameManager.Instance.CheckAllWinConditions())
             GameManager.Instance.State = GameState.PlayerMove;
@@ -255,10 +259,18 @@ public class Movable : MonoBehaviour
 
         foreach ((Puzzle_Element, GridTile) addPair in addList)
         {
-            WinCondition wc = addPair.Item2.GetComponent<WinCondition>();
+            // Potentially better way would be to have Puzzle Element have a wincondition member...
+            WinCondition wc = addPair.Item1.GetComponent<WinCondition>();
             if (wc)
                 wc.CheckOneTimeList(addPair.Item1.ElementID);
             addPair.Item2.Contents.Add(addPair.Item1);
+            addPair.Item1.CurrentTile = addPair.Item2;
+            
+            PlayerMovement mv = addPair.Item1.GetComponent<PlayerMovement>();
+            if (addPair.Item1.ElementID == 0 && mv)
+            {
+                ls = addPair.Item2.GetFirstLevelSelector();
+            }
         }
     }
 
@@ -306,5 +318,11 @@ public class Movable : MonoBehaviour
             //Debug.Log("A " + temps[i].transform.parent.GetComponent<GridTile>().Contents.Count);
             Destroy(temps[i].gameObject);
         }
+    }
+
+    private void OnDestroy()
+    {
+        // Account for in list?
+        GameManager.Instance.QueuedMoves.Remove(gameObject);
     }
 }

@@ -27,6 +27,7 @@ public class PlayerMovement : MonoBehaviour
     private void Start()
     {
         puzzleElement = GetComponent<Puzzle_Element>();
+        GameManager.Instance.PlayerMovements.Add(this);
         if (!puzzleElement)
             Debug.Log("WARNING: PlayerMovement was initialized on an object without a puzzle element!");
     }

@@ -21,6 +21,8 @@ public class MovableSnapAssign : MonoBehaviour
     {
         this.transform.position = new Vector3(tile.transform.position.x, tile.transform.position.y, 0);
         GetComponent<Movable>().CurrentTile = tile;
-        tile.Contents.Add(gameObject.GetComponent<Puzzle_Element>());
+        Puzzle_Element pz = gameObject.GetComponent<Puzzle_Element>();
+        tile.Contents.Add(pz);
+        pz.CurrentTile = tile;
     }
 }

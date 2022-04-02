@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class SimpleSpriteSorter : MonoBehaviour
 {
+    /*
     public float offset;
 
     public float playerOffset = -.75f;
@@ -53,4 +54,5 @@ public class SimpleSpriteSorter : MonoBehaviour
             sr.sortingOrder = 0;
         }
     }
+    */
 }

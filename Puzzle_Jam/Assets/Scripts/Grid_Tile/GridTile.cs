@@ -37,4 +37,16 @@ public class GridTile : MonoBehaviour
 
         return false;
     }
+
+    public LevelSelector GetFirstLevelSelector()
+    {
+        foreach (Puzzle_Element e in contents)
+        {
+            LevelSelector l = e.GetComponent<LevelSelector>();
+            if (l)
+                return l;
+        }
+
+        return null;
+    }
 }

@@ -11,6 +11,9 @@ public class Puzzle_Element : MonoBehaviour
     private int elementID;
 
     [SerializeField]
+    private GridTile currentTile;
+
+    [SerializeField]
     private Vector2 facingDirection;
 
     [SerializeField]
@@ -38,6 +41,12 @@ public class Puzzle_Element : MonoBehaviour
     public int ElementID
     {
         get { return elementID; }
+    }
+
+    public GridTile CurrentTile
+    {
+        get { return currentTile; }
+        set { currentTile = value; }
     }
 
     public Vector2 FacingDirection
