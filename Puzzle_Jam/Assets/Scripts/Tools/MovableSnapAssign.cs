@@ -4,9 +4,10 @@ using UnityEngine;
 
 public class MovableSnapAssign : MonoBehaviour
 {
-    private bool ftFlag = true;
+    //private bool ftFlag = true;
 
-    // Could also just physics cirlc on start...
+    /*
+    // Could also just physics circle on start...
     private void OnTriggerEnter2D(Collider2D collision)
     {
         GridTile tile = collision.GetComponent<GridTile>();
@@ -15,13 +16,29 @@ public class MovableSnapAssign : MonoBehaviour
             ftFlag = false;
             SnapToCenter(tile);
         }
+    }*/
+
+    private void Start()
+    {
+        SnapToCenter();
     }
 
-    private void SnapToCenter(GridTile tile)
+    public void SnapToCenter()
     {
+        var colliders = Physics2D.OverlapCircleAll(transform.position, 0.15f, GameLayers.Instance.TileLayer);
+        if (colliders.Length == 0)
+            return;
+        GridTile tile = colliders[0].GetComponent<GridTile>();
+
         this.transform.position = new Vector3(tile.transform.position.x, tile.transform.position.y, 0);
-        GetComponent<Movable>().CurrentTile = tile;
+
+        Movable m = GetComponent<Movable>();
         Puzzle_Element pz = gameObject.GetComponent<Puzzle_Element>();
+
+        if (m.CurrentTile)
+            m.CurrentTile.Contents.Remove(pz);
+
+        m.CurrentTile = tile;
         tile.Contents.Add(pz);
         pz.CurrentTile = tile;
     }

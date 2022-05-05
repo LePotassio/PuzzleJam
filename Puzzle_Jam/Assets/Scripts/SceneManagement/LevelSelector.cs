@@ -7,13 +7,48 @@ public class LevelSelector : MonoBehaviour
     [SerializeField]
     private LevelWarp levelWarp;
 
+    private SpriteRenderer sr;
+
+    [SerializeField]
+    private Sprite newLevelSprite;
+
+    [SerializeField]
+    private Sprite startedLevelSprite;
+
+    [SerializeField]
+    private Sprite completedLevelSprite;
+
     public LevelWarp LevelWarp
     {
         get { return levelWarp; }
     }
 
+    private void Start()
+    {
+        sr = GetComponentInChildren<SpriteRenderer>();
+
+        // TO DO: Set image to correspond to level status...
+        LevelStatus status = GameManager.Instance.SaveFileProgress.LevelCompletions[levelWarp.SceneToLoad];
+
+        switch (status)
+        {
+            case LevelStatus.New:
+                sr.sprite = newLevelSprite;
+                break;
+            case LevelStatus.Started:
+                sr.sprite = startedLevelSprite;
+                break;
+            case LevelStatus.Completed:
+                sr.sprite = completedLevelSprite;
+                break;
+        }
+    }
+
     public void ActivateLevelSelect()
     {
-        GameManager.Instance.SwitchLevel(levelWarp.SceneToLoad);
+        if (!levelWarp.OverrideStartingPosition)
+            GameManager.Instance.SwitchLevel(levelWarp.SceneToLoad);
+        else
+            GameManager.Instance.SwitchLevel(levelWarp.SceneToLoad, levelWarp.SinglePositionOverride);
     }
 }

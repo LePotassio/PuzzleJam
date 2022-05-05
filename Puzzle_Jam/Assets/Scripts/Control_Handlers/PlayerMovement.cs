@@ -10,6 +10,9 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField]
     private Movable movable;
 
+    [SerializeField]
+    private bool startingPlayer = false;
+
     private Puzzle_Element puzzleElement;
 
     private bool isChangingDir;
@@ -19,6 +22,11 @@ public class PlayerMovement : MonoBehaviour
         get { return movable; }
     }
 
+    public bool StartingPlayer
+    {
+        get { return startingPlayer; }
+    }
+
     private void Awake()
     {
         isChangingDir = false;
@@ -26,6 +34,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void Start()
     {
+        if (startingPlayer)
+            GameManager.Instance.StartingPlayerRef = this;
         puzzleElement = GetComponent<Puzzle_Element>();
         GameManager.Instance.PlayerMovements.Add(this);
         if (!puzzleElement)

@@ -153,6 +153,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   levelWarp:
     sceneToLoad: 1
+  newLevelSprite: {fileID: 21300000, guid: e4c8e4661b4d45548b445ebe78808dbf, type: 3}
+  startedLevelSprite: {fileID: 21300000, guid: d791f66864ff31044bd590fbcb470c92, type: 3}
+  completedLevelSprite: {fileID: 21300000, guid: 3720eaf57068ae045aa317710fe6b907, type: 3}
 --- !u!1 &7396186087077708509
 GameObject:
   m_ObjectHideFlags: 0
@@ -224,8 +227,8 @@ SpriteRenderer:
   m_SortingLayerID: -843233815
   m_SortingLayer: 1
   m_SortingOrder: 1
-  m_Sprite: {fileID: 21300000, guid: 3a2e305edc362434487ac09bf57487a5, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.39215687}
+  m_Sprite: {fileID: 21300000, guid: e4c8e4661b4d45548b445ebe78808dbf, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

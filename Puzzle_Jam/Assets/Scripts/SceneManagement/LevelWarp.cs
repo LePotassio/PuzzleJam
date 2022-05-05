@@ -14,15 +14,50 @@ public class LevelWarp
     // Resolve this by having this implementation only
 
     [SerializeField]
-    private int sceneToLoad;
+    private string sceneToLoad;
+
+    // WARNING: Do not use this if multiple objects are the player! (Or make one a dominant "Player using a tag?")
+    [Header("Starting Player Object Override")]
+    [SerializeField]
+    private bool overrideStartingPosition = false;
+
+    [SerializeField]
+    private PlayerPositionSave singlePositionOverride;
 
     //[SerializeField]
     //InteractionMode startingInteractionMode;
 
     // List of interactions you can swap to here
 
-    public int SceneToLoad
+    public string SceneToLoad
     {
         get { return sceneToLoad; }
+    }
+
+    public bool OverrideStartingPosition
+    {
+        get { return overrideStartingPosition; }
+    }
+
+    public PlayerPositionSave SinglePositionOverride
+    {
+        get { return singlePositionOverride; }
+    }
+}
+
+[System.Serializable]
+public class PlayerPositionSave
+{
+    [SerializeField]
+    private Vector2 singlePositionOverride;
+
+    public Vector2 SinglePositionOverride
+    {
+        get { return singlePositionOverride; }
+    }
+
+    public PlayerPositionSave(Vector2 vec)
+    {
+        singlePositionOverride = vec;
     }
 }

@@ -1074,6 +1074,22 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4391866890263075892, guid: 8ebfde21b289a394e829b89d059cc9ad, type: 3}
+      propertyPath: onCompleteWarp.sceneToLoad
+      value: Puzzle_Lobby_1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4391866890263075892, guid: 8ebfde21b289a394e829b89d059cc9ad, type: 3}
+      propertyPath: onCompleteWarp.overrideStartingPosition
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4391866890263075892, guid: 8ebfde21b289a394e829b89d059cc9ad, type: 3}
+      propertyPath: onCompleteWarp.singlePositionOverride.singlePositionOverride.x
+      value: -1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4391866890263075892, guid: 8ebfde21b289a394e829b89d059cc9ad, type: 3}
+      propertyPath: onCompleteWarp.singlePositionOverride.singlePositionOverride.y
+      value: 1.5
+      objectReference: {fileID: 0}
     - target: {fileID: 7936076181019569825, guid: 8ebfde21b289a394e829b89d059cc9ad, type: 3}
       propertyPath: m_RootOrder
       value: 1
@@ -2637,14 +2653,6 @@ PrefabInstance:
     - target: {fileID: 3353168745999328195, guid: 99cdbdfa3b5fd9246accd71bd8256619, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4972988094918944045, guid: 99cdbdfa3b5fd9246accd71bd8256619, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8755899131646035583, guid: 99cdbdfa3b5fd9246accd71bd8256619, type: 3}
-      propertyPath: m_Color.a
-      value: 0.78431374
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 99cdbdfa3b5fd9246accd71bd8256619, type: 3}

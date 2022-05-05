@@ -47,6 +47,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onCompleteWarp:
     sceneToLoad: 0
+    overrideStartingPosition: 0
+    singlePositionOverride:
+      singlePositionOverride: {x: 0, y: 0}
 --- !u!1001 &2279989317671815360
 PrefabInstance:
   m_ObjectHideFlags: 0

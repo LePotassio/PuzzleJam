@@ -62,6 +62,7 @@ public class Puzzle_Element : MonoBehaviour
     public List<Puzzle_Element> AttachedElements
     {
         get { return attachedElements; }
+        set { attachedElements = value; }
     }
 
     public bool ChangeFacingDirection(string dir)

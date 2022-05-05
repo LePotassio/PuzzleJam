@@ -54,6 +54,7 @@ MonoBehaviour:
   currentWinConditions: []
   currentPuzzle: {fileID: 0}
   mainCamera: {fileID: 3746589424797894096}
+  startingPlayerRef: {fileID: 0}
 --- !u!114 &3746589424558225970
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -148,7 +149,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.58152366, g: 0.651096, b: 0.764151, a: 0}
+  m_BackGroundColor: {r: 0.77480125, g: 0.80688214, b: 0.8584906, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0

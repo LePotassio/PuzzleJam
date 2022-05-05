@@ -33,6 +33,13 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private Camera mainCamera;
 
+    [SerializeField]
+    private SaveFileProgress saveFileProgress;
+
+    // private Vector2 onCompletionReturnPosition;
+    [SerializeField]
+    PlayerMovement startingPlayerRef;
+
     private bool winDelay;
 
     public List<PlayerMovement> PlayerMovements
@@ -67,6 +74,17 @@ public class GameManager : MonoBehaviour
         set { winDelay = value; }
     }
 
+    public SaveFileProgress SaveFileProgress
+    {
+        get { return saveFileProgress; }
+    }
+
+    public PlayerMovement StartingPlayerRef
+    {
+        get { return startingPlayerRef; }
+        set { startingPlayerRef = value; }
+    }
+
     public GameState State
     {
         get { return state; }
@@ -77,6 +95,7 @@ public class GameManager : MonoBehaviour
     {
         DontDestroyOnLoad(this);
         Instance = this;
+        saveFileProgress = new SaveFileProgress();
         queuedMoves = new List<GameObject>();
     }
 
@@ -94,8 +113,14 @@ public class GameManager : MonoBehaviour
             Debug.Log("A winner is you!");
             // You win goes here
 
+            SaveFileProgress.LevelCompletions[SceneManager.GetActiveScene().name] = LevelStatus.Completed;
+
             // Then swap back to level select
-            SwitchLevel(currentPuzzle.OnCompletionWarp.SceneToLoad);
+            LevelWarp onCompletionWarp = currentPuzzle.OnCompletionWarp;
+            if (!onCompletionWarp.OverrideStartingPosition)
+                SwitchLevel(onCompletionWarp.SceneToLoad);
+            else
+                SwitchLevel(onCompletionWarp.SceneToLoad, onCompletionWarp.SinglePositionOverride);
         }
     }
 
@@ -124,7 +149,7 @@ public class GameManager : MonoBehaviour
         state = GameState.PlayerMove;
     }
 
-    public void SwitchLevel(int sceneIndex)
+    public void SwitchLevel(string sceneName, PlayerPositionSave startingPlayerPosOverride = null)
     {
         Scene curScene = SceneManager.GetActiveScene();
         // Unload old scene
@@ -136,7 +161,10 @@ public class GameManager : MonoBehaviour
         // Wait for load issue: Need to wait for all references to be setup, and cant load before unload
 
         // Load new scene
-        SceneManager.LoadScene(sceneIndex);
+        SceneManager.LoadScene(sceneName);
+
+        if (startingPlayerPosOverride != null)
+            StartCoroutine(OverrideStartingPlayerPos(startingPlayerPosOverride));
     }
 
     public void ClearGameManager()
@@ -147,9 +175,23 @@ public class GameManager : MonoBehaviour
         interactionHandler.ClearInteractionHandler();
         currentPuzzle = null;
         winDelay = true;
+        startingPlayerRef = null;
+
         state = GameState.PlayerMove;
     }
 
+    public IEnumerator OverrideStartingPlayerPos(PlayerPositionSave startingPlayerPos)
+    {
+        // Assume we always have a starting player ref if we are overriding its position...
+        yield return new WaitUntil(() => startingPlayerRef != null);
+
+        startingPlayerRef.transform.position = startingPlayerPos.SinglePositionOverride;
+
+        // Snap to center deals with tile content management (but would need delay for starting interactions... That would be good in general considering awake order)
+        startingPlayerRef.GetComponent<MovableSnapAssign>().SnapToCenter();
+    }
+
+    // Will need to be changed to find nearest grid center and then center to that...
     public void RecenterCamera(GameObject center)
     {
         mainCamera.transform.position = new Vector3(center.transform.position.x, center.transform.position.y, -10);

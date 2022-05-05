@@ -17,6 +17,9 @@ public class Movable : MonoBehaviour
 
     private LevelSelector ls;
 
+    [SerializeField]
+    private List<(PositionWarp, GameObject)> queuedWarps;
+
     public GameObject Player_Obj
     {
         get { return movableObj; }
@@ -28,8 +31,14 @@ public class Movable : MonoBehaviour
         set { currentTile = value; }
     }
 
+    public Puzzle_Element PuzzleElement
+    {
+        get { return puzzleElement; }
+    }
+
     private void Awake()
     {
+        queuedWarps = new List<(PositionWarp, GameObject)> ();
         movableObj = gameObject;
         rb = GetComponent<Rigidbody2D>();
     }
@@ -115,11 +124,18 @@ public class Movable : MonoBehaviour
 
         ls?.ActivateLevelSelect();
 
+        foreach (var warp in queuedWarps)
+        {
+            warp.Item1.DoWarp(warp.Item2);
+        }
+        queuedWarps = new List<(PositionWarp, GameObject)>();
+
         foreach (InteractionReticle r in GameManager.Instance.InteractionHandler.Reticles)
         {
             r.UpdateCurrentTile();
         }
 
+        // Could just directly move to win in Gamemanager... I think this way is more flexible though
         if (!GameManager.Instance.CheckAllWinConditions())
             GameManager.Instance.State = GameState.PlayerMove;
         else
@@ -260,7 +276,7 @@ public class Movable : MonoBehaviour
         foreach ((Puzzle_Element, GridTile) addPair in addList)
         {
             // Potentially better way would be to have Puzzle Element have a wincondition member...
-            WinCondition wc = addPair.Item1.GetComponent<WinCondition>();
+            WinCondition wc = addPair.Item2.GetComponent<WinCondition>();
             if (wc)
                 wc.CheckOneTimeList(addPair.Item1.ElementID);
             addPair.Item2.Contents.Add(addPair.Item1);
@@ -270,6 +286,18 @@ public class Movable : MonoBehaviour
             if (addPair.Item1.ElementID == 0 && mv)
             {
                 ls = addPair.Item2.GetFirstLevelSelector();
+            }
+
+            // Assume we never have a win condition on warp or a level selector on warp at the same time...
+
+            for (int a = 0; a < addPair.Item2.Contents.Count; a++)
+            {
+                PositionWarp posWarp = addPair.Item2.Contents[a].GetComponent<PositionWarp>();
+                if (posWarp)
+                {
+                    queuedWarps.Add((posWarp, addPair.Item1.gameObject));
+                    break;
+                }
             }
         }
     }
