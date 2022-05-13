@@ -23,6 +23,9 @@ public class GameManager : MonoBehaviour
 
     private MainMenu mainMenu;
 
+    [SerializeField]
+    private PuzzleUI puzzleUI;
+
     // Need a class for an action
     private List<GameObject> queuedMoves;
 
@@ -96,7 +99,9 @@ public class GameManager : MonoBehaviour
     public GameState State
     {
         get { return state; }
-        set { state = value; }
+        set {
+            state = value;
+        }
     }
 
     private void Awake()
@@ -110,12 +115,19 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         if (SceneManager.GetActiveScene().name == "MainMenu")
-            state = GameState.TitleMenu;
+        {
+            State = GameState.TitleMenu;
+            puzzleUI.gameObject.SetActive(false);
+        } else
+        {
+            StartCoroutine(UpdateCurrentPuzzleUI());
+        }
     }
 
     private void Update()
     {
         // This is where all the gameplay handlers will go, certain ones will be called depending on what the gamestate is
+        //if (state != GameState.TitleMenu && )
         if (state == GameState.PlayerMove)
         {
             interactionHandler.DoUpdate();
@@ -181,6 +193,8 @@ public class GameManager : MonoBehaviour
         // Load new scene
         SceneManager.LoadScene(sceneName);
 
+        StartCoroutine(UpdateCurrentPuzzleUI());
+
         if (startingPlayerPosOverride != null)
             StartCoroutine(OverrideStartingPlayerPos(startingPlayerPosOverride));
     }
@@ -195,7 +209,7 @@ public class GameManager : MonoBehaviour
         winDelay = true;
         startingPlayerRef = null;
 
-        state = GameState.PlayerMove;
+        State = GameState.PlayerMove;
     }
 
     public IEnumerator OverrideStartingPlayerPos(PlayerPositionSave startingPlayerPos)
@@ -218,13 +232,21 @@ public class GameManager : MonoBehaviour
     public IEnumerator StartMainMenu()
     {
         yield return new WaitUntil(() => mainMenu);
-        state = GameState.TitleMenu;
+        State = GameState.TitleMenu;
     }
 
     public void StartNewGame()
     {
         SceneManager.LoadScene("Puzzle_Lobby_1");
         mainMenu = null;
-        state = GameState.PlayerMove;
+        puzzleUI.gameObject.SetActive(true);
+        StartCoroutine(UpdateCurrentPuzzleUI());
+        State = GameState.PlayerMove;
+    }
+
+    private IEnumerator UpdateCurrentPuzzleUI()
+    {
+        yield return new WaitUntil(() => currentPuzzle);
+        puzzleUI.SetSidebarPuzzleInfo(currentPuzzle.LevelData);
     }
 }

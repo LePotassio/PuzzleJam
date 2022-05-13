@@ -1673,6 +1673,22 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 4391866890263075892, guid: 8ebfde21b289a394e829b89d059cc9ad, type: 3}
+      propertyPath: levelData.puzzleCode
+      value: L-1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4391866890263075892, guid: 8ebfde21b289a394e829b89d059cc9ad, type: 3}
+      propertyPath: levelData.puzzleName
+      value: Puzzle Lobby 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4391866890263075892, guid: 8ebfde21b289a394e829b89d059cc9ad, type: 3}
+      propertyPath: levelData.journalText
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4391866890263075892, guid: 8ebfde21b289a394e829b89d059cc9ad, type: 3}
+      propertyPath: levelData.puzzleDifficulty
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4391866890263075892, guid: 8ebfde21b289a394e829b89d059cc9ad, type: 3}
       propertyPath: onCompleteWarp.sceneToLoad
       value: -1
       objectReference: {fileID: 0}
