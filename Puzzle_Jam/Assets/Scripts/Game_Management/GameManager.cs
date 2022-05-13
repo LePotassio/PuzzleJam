@@ -21,6 +21,8 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private InteractionHandler interactionHandler;
 
+    private MainMenu mainMenu;
+
     // Need a class for an action
     private List<GameObject> queuedMoves;
 
@@ -45,6 +47,12 @@ public class GameManager : MonoBehaviour
     public List<PlayerMovement> PlayerMovements
     {
         get { return player_movements; }
+    }
+
+    public MainMenu MainMenu
+    {
+        get { return mainMenu; }
+        set { mainMenu = value; }
     }
 
     public InteractionHandler InteractionHandler
@@ -99,6 +107,12 @@ public class GameManager : MonoBehaviour
         queuedMoves = new List<GameObject>();
     }
 
+    private void Start()
+    {
+        if (SceneManager.GetActiveScene().name == "MainMenu")
+            state = GameState.TitleMenu;
+    }
+
     private void Update()
     {
         // This is where all the gameplay handlers will go, certain ones will be called depending on what the gamestate is
@@ -121,6 +135,10 @@ public class GameManager : MonoBehaviour
                 SwitchLevel(onCompletionWarp.SceneToLoad);
             else
                 SwitchLevel(onCompletionWarp.SceneToLoad, onCompletionWarp.SinglePositionOverride);
+        }
+        else if (state == GameState.TitleMenu)
+        {
+            mainMenu.DoUpdate();
         }
     }
 
@@ -195,5 +213,18 @@ public class GameManager : MonoBehaviour
     public void RecenterCamera(GameObject center)
     {
         mainCamera.transform.position = new Vector3(center.transform.position.x, center.transform.position.y, -10);
+    }
+
+    public IEnumerator StartMainMenu()
+    {
+        yield return new WaitUntil(() => mainMenu);
+        state = GameState.TitleMenu;
+    }
+
+    public void StartNewGame()
+    {
+        SceneManager.LoadScene("Puzzle_Lobby_1");
+        mainMenu = null;
+        state = GameState.PlayerMove;
     }
 }
