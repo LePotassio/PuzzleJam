@@ -24,6 +24,9 @@ public class GameManager : MonoBehaviour
     private MainMenu mainMenu;
 
     [SerializeField]
+    private PauseMenu pauseMenu;
+
+    [SerializeField]
     private PuzzleUI puzzleUI;
 
     // Need a class for an action
@@ -46,6 +49,8 @@ public class GameManager : MonoBehaviour
     PlayerMovement startingPlayerRef;
 
     private bool winDelay;
+
+    private GameState pausedStateCache;
 
     public List<PlayerMovement> PlayerMovements
     {
@@ -114,6 +119,8 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        pauseMenu.gameObject.SetActive(false);
+
         if (SceneManager.GetActiveScene().name == "MainMenu")
         {
             State = GameState.TitleMenu;
@@ -127,8 +134,14 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         // This is where all the gameplay handlers will go, certain ones will be called depending on what the gamestate is
-        //if (state != GameState.TitleMenu && )
-        if (state == GameState.PlayerMove)
+        if (state != GameState.TitleMenu && GameSettings.Instance.GetKeyBindingDown(KeyButtons.PauseResume))
+        {
+            if (state == GameState.PauseMenu)
+                ResumeGame();
+            else
+                PauseGame();
+        }
+        else if (state == GameState.PlayerMove)
         {
             interactionHandler.DoUpdate();
             foreach (PlayerMovement pm in player_movements)
@@ -151,6 +164,10 @@ public class GameManager : MonoBehaviour
         else if (state == GameState.TitleMenu)
         {
             mainMenu.DoUpdate();
+        }
+        else if (state == GameState.PauseMenu)
+        {
+            pauseMenu.DoUpdate();
         }
     }
 
@@ -231,6 +248,8 @@ public class GameManager : MonoBehaviour
 
     public IEnumerator StartMainMenu()
     {
+        pauseMenu.gameObject.SetActive(false);
+        SceneManager.LoadScene("MainMenu");
         yield return new WaitUntil(() => mainMenu);
         State = GameState.TitleMenu;
     }
@@ -238,7 +257,6 @@ public class GameManager : MonoBehaviour
     public void StartNewGame()
     {
         SceneManager.LoadScene("Puzzle_Lobby_1");
-        mainMenu = null;
         puzzleUI.gameObject.SetActive(true);
         StartCoroutine(UpdateCurrentPuzzleUI());
         State = GameState.PlayerMove;
@@ -248,5 +266,20 @@ public class GameManager : MonoBehaviour
     {
         yield return new WaitUntil(() => currentPuzzle);
         puzzleUI.SetSidebarPuzzleInfo(currentPuzzle.LevelData);
+    }
+
+
+    // Will we run into movement cancellation problem? Pause the moment the waituntil changes the state in movable...
+    public void PauseGame()
+    {
+        pauseMenu.OpenMenu();
+        pausedStateCache = State;
+        State = GameState.PauseMenu;
+    }
+
+    public void ResumeGame()
+    {
+        pauseMenu.gameObject.SetActive(false);
+        State = pausedStateCache;
     }
 }

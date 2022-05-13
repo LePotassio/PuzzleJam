@@ -120,7 +120,7 @@ public class Movable : MonoBehaviour
             attachedMov.ProcAllMovements(dirVec);
         }
 
-        yield return new WaitUntil(() => GameManager.Instance.QueuedMoves.Count == 0);
+        yield return new WaitUntil(() => GameManager.Instance.QueuedMoves.Count == 0 && GameManager.Instance.State != GameState.PauseMenu);
 
         ls?.ActivateLevelSelect();
 
@@ -173,8 +173,11 @@ public class Movable : MonoBehaviour
         while ((target - transform.position).sqrMagnitude > Mathf.Epsilon)
         {
             //transform.position = Vector3.Lerp(transform.position, target, Time.deltaTime * moveSpeed);
-            transform.position = Vector3.MoveTowards(transform.position, target, moveSpeed * Time.deltaTime);
-            
+            if (GameManager.Instance.State != GameState.PauseMenu)
+                transform.position = Vector3.MoveTowards(transform.position, target, moveSpeed * Time.deltaTime);
+
+            // May need to add yield to wait for resuming from pause (waituntil state == moveresolution)
+
             yield return null;
         }
 

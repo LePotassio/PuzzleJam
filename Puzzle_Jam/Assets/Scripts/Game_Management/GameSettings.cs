@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum KeyButtons { Interact, MoveUp, MoveDown, MoveLeft, MoveRight, MenuUp, MenuDown, MenuSelect }
+public enum KeyButtons { Interact, MoveUp, MoveDown, MoveLeft, MoveRight, MenuUp, MenuDown, MenuSelect, PauseResume }
 
 public class GameSettings : MonoBehaviour
 {
@@ -33,6 +33,7 @@ public class GameSettings : MonoBehaviour
         { KeyButtons.MenuUp, new List<KeyCode> { KeyCode.UpArrow, KeyCode.W } },
         { KeyButtons.MenuDown, new List<KeyCode> { KeyCode.DownArrow, KeyCode.S } },
         { KeyButtons.MenuSelect, new List<KeyCode> { KeyCode.Space, KeyCode.E } },
+        { KeyButtons.PauseResume, new List<KeyCode> { KeyCode.Escape } },
     };
 
     public bool GetKeyBinding(KeyButtons kb)

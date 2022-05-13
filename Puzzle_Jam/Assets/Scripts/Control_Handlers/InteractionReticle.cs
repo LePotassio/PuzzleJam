@@ -84,8 +84,11 @@ public class InteractionReticle : MonoBehaviour
 
         while (tTaken < timeToFinish)
         {
-            transform.position = Vector3.MoveTowards(transform.position, targetPos, diff.magnitude / (timeToFinish / Time.deltaTime));
-            tTaken += Time.deltaTime;
+            if (GameManager.Instance.State != GameState.PauseMenu)
+            {
+                transform.position = Vector3.MoveTowards(transform.position, targetPos, diff.magnitude / (timeToFinish / Time.deltaTime));
+                tTaken += Time.deltaTime;
+            }
             yield return null;
         }
 

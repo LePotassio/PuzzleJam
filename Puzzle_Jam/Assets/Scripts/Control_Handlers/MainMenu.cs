@@ -80,4 +80,9 @@ public class MainMenu : MonoBehaviour
             }
         }
     }
+
+    private void OnDestroy()
+    {
+        GameManager.Instance.MainMenu = null;
+    }
 }
