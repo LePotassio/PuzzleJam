@@ -99,6 +99,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sr: {fileID: 3353168746075508720}
   movable: {fileID: 97188646542362573}
+  startingPlayer: 1
 --- !u!114 &97188646542362573
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -137,6 +138,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   elementID: 0
+  currentTile: {fileID: 0}
   facingDirection: {x: 0, y: 0}
   startingDirection: {x: 0, y: -1}
   attachedElements: []
@@ -400,4 +402,6 @@ MonoBehaviour:
   aimerElement: {fileID: 4798136449638955010}
   pullReticle: {fileID: 21300000, guid: 59d44992fc66e5841aba1c09570cc2e4, type: 3}
   releaseReticle: {fileID: 21300000, guid: 1d49b7c76153c334c80ebb375ac02b85, type: 3}
-  interactionMode: 1
+  interactionMode: 0
+  availableInteractions: 00000000
+  currentInteraction: 0

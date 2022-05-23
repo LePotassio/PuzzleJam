@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public enum GameState { PlayerMove, MoveStandby, MoveResolution, PuzzleSolved, PauseMenu, TitleMenu };
+public enum GameState { PlayerMove, MoveStandby, MoveResolution, PuzzleSolved, PauseMenu, TitleMenu, SaveMenu, LoadMenu };
+
+public enum CameraState { PuzzleLocked, Follow };
 
 /// <summary>
 /// The game manager is a singleton class that keeps track of the update loop
@@ -21,13 +23,24 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private InteractionHandler interactionHandler;
 
+    // Could potential be put into the essentail objects to allow for main menu access everywhere...
+    [SerializeField]
     private MainMenu mainMenu;
+
+    [SerializeField]
+    private MainMenu loadMenu;
 
     [SerializeField]
     private PauseMenu pauseMenu;
 
     [SerializeField]
+    private PauseMenu saveMenu;
+
+    [SerializeField]
     private PuzzleUI puzzleUI;
+
+    [SerializeField]
+    private InteractionModeUI interactionModeUI;
 
     // Need a class for an action
     private List<GameObject> queuedMoves;
@@ -41,7 +54,9 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private Camera mainCamera;
 
-    [SerializeField]
+    private CameraState cameraMode = CameraState.PuzzleLocked;
+
+    //[SerializeField]
     private SaveFileProgress saveFileProgress;
 
     // private Vector2 onCompletionReturnPosition;
@@ -51,6 +66,8 @@ public class GameManager : MonoBehaviour
     private bool winDelay;
 
     private GameState pausedStateCache;
+
+    private int buildSceneCount;
 
     public List<PlayerMovement> PlayerMovements
     {
@@ -93,6 +110,7 @@ public class GameManager : MonoBehaviour
     public SaveFileProgress SaveFileProgress
     {
         get { return saveFileProgress; }
+        set { saveFileProgress = value; }
     }
 
     public PlayerMovement StartingPlayerRef
@@ -109,10 +127,28 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public int BuildSceneCount
+    {
+        get { return buildSceneCount; }
+    }
+
+    public CameraState CameraMode
+    {
+        get { return cameraMode; }
+        set
+        {
+            cameraMode = value;
+            RecenterCameraToBox();
+        }
+    }
+
     private void Awake()
     {
+        buildSceneCount = SceneManager.sceneCountInBuildSettings;
+
         DontDestroyOnLoad(this);
         Instance = this;
+        // default to no progress, then load a save from menu handler...
         saveFileProgress = new SaveFileProgress();
         queuedMoves = new List<GameObject>();
     }
@@ -120,10 +156,12 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         pauseMenu.gameObject.SetActive(false);
+        saveMenu.gameObject.SetActive(false);
 
         if (SceneManager.GetActiveScene().name == "MainMenu")
         {
             State = GameState.TitleMenu;
+            MainMenu.OpenMenu();
             puzzleUI.gameObject.SetActive(false);
         } else
         {
@@ -134,7 +172,7 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         // This is where all the gameplay handlers will go, certain ones will be called depending on what the gamestate is
-        if (state != GameState.TitleMenu && GameSettings.Instance.GetKeyBindingDown(KeyButtons.PauseResume))
+        if ((state != GameState.TitleMenu && state != GameState.LoadMenu) && GameSettings.Instance.GetKeyBindingDown(KeyButtons.PauseResume))
         {
             if (state == GameState.PauseMenu)
                 ResumeGame();
@@ -168,6 +206,23 @@ public class GameManager : MonoBehaviour
         else if (state == GameState.PauseMenu)
         {
             pauseMenu.DoUpdate();
+        }
+        else if (state == GameState.SaveMenu)
+        {
+            saveMenu.DoUpdate();
+        }
+        else if (state == GameState.LoadMenu)
+        {
+            loadMenu.DoUpdate();
+        }
+    }
+
+    private void LateUpdate()
+    {
+        if (cameraMode == CameraState.Follow && startingPlayerRef)
+        {
+            Vector3 targ = startingPlayerRef.transform.position;
+            mainCamera.transform.position = new Vector3(targ.x, targ.y, -10);
         }
     }
 
@@ -243,14 +298,22 @@ public class GameManager : MonoBehaviour
     // Will need to be changed to find nearest grid center and then center to that...
     public void RecenterCamera(GameObject center)
     {
-        mainCamera.transform.position = new Vector3(center.transform.position.x, center.transform.position.y, -10);
+        if (cameraMode == CameraState.PuzzleLocked) // Can change this later for camera size and smooth cahnging (smoothly lerp to terget position in update to avoid coroutine cancellation hassle)
+            mainCamera.transform.position = new Vector3(center.transform.position.x, center.transform.position.y, -10);
     }
 
-    public IEnumerator StartMainMenu()
+    public void RecenterCameraToBox()
+    {
+        var cb = Physics2D.OverlapCircle(startingPlayerRef.transform.position, 0.15f, GameLayers.Instance.CamBoxLayer);
+        if (cb)
+            RecenterCamera(cb.gameObject);
+    }
+
+    public void StartMainMenu()
     {
         pauseMenu.gameObject.SetActive(false);
         SceneManager.LoadScene("MainMenu");
-        yield return new WaitUntil(() => mainMenu);
+        MainMenu.OpenMenu();
         State = GameState.TitleMenu;
     }
 
@@ -259,7 +322,33 @@ public class GameManager : MonoBehaviour
         SceneManager.LoadScene("Puzzle_Lobby_1");
         puzzleUI.gameObject.SetActive(true);
         StartCoroutine(UpdateCurrentPuzzleUI());
+        MainMenu.CloseMenu();
+        saveFileProgress = new SaveFileProgress();
         State = GameState.PlayerMove;
+    }
+
+    public void SaveGame(int saveSlot)
+    {
+        saveFileProgress.SaveProgress(saveSlot);
+
+        Debug.Log($"Saved to save slot {saveSlot}");
+
+    }
+
+    public void LoadGame(int saveSlot)
+    {
+        saveFileProgress = SaveSystem.LoadProgress(saveSlot);
+
+        //Temporary until checkpoints
+        SceneManager.LoadScene("Puzzle_Lobby_1");
+
+        puzzleUI.gameObject.SetActive(true);
+        StartCoroutine(UpdateCurrentPuzzleUI());
+        MainMenu.CloseMenu();
+        loadMenu.CloseMenu();
+        State = GameState.PlayerMove;
+
+        Debug.Log($"Loaded from save slot {saveSlot}");
     }
 
     private IEnumerator UpdateCurrentPuzzleUI()
@@ -268,6 +357,18 @@ public class GameManager : MonoBehaviour
         puzzleUI.SetSidebarPuzzleInfo(currentPuzzle.LevelData);
     }
 
+    public void OpenLoadMenu()
+    {
+        loadMenu.OpenMenu();
+        pausedStateCache = State;
+        State = GameState.LoadMenu;
+    }
+
+    public void CloseLoadMenu()
+    {
+        State = pausedStateCache;
+        loadMenu.gameObject.SetActive(false);
+    }
 
     // Will we run into movement cancellation problem? Pause the moment the waituntil changes the state in movable...
     public void PauseGame()
@@ -279,7 +380,63 @@ public class GameManager : MonoBehaviour
 
     public void ResumeGame()
     {
-        pauseMenu.gameObject.SetActive(false);
         State = pausedStateCache;
+        pauseMenu.gameObject.SetActive(false);
+    }
+
+    public void OpenSaveMenu()
+    {
+        pauseMenu.GetComponent<Canvas>().enabled = false;
+        saveMenu.OpenMenu();
+        State = GameState.SaveMenu;
+    }
+
+    public void CloseSaveMenu()
+    {
+        pauseMenu.GetComponent<Canvas>().enabled = true;
+        State = GameState.PauseMenu;
+        saveMenu.gameObject.SetActive(false);
+    }
+
+    public void UpdateInteractionModeUI()
+    {
+        UpdateInteractionModeUI(startingPlayerRef.GetComponentInChildren<InteractionReticle>());
+    }
+
+    public void UpdateInteractionModeUI(InteractionReticle originalPlayerReticle)
+    {
+        interactionModeUI.SetInteractionUI(originalPlayerReticle.InteractionMode, originalPlayerReticle.AvailableInteractions.Count > 1);
+    }
+
+    /*public void SwapToNextInteractionMode()
+    {
+        InteractionReticle originalPlayerReticle = startingPlayerRef.GetComponentInChildren<InteractionReticle>();
+        if (originalPlayerReticle.InteractionMode == InteractionMode.Release)
+            return;
+
+        foreach (InteractionReticle r in interactionHandler.Reticles)
+        {
+            if (r.InteractionMode == InteractionMode.Release)
+                continue;
+            r.CurrentInteraction++;
+            if (r.CurrentInteraction > r.AvailableInteractions.Count - 1)
+                r.CurrentInteraction = 0;
+            r.InteractionMode = r.AvailableInteractions[r.CurrentInteraction];
+
+            //if (r.InteractionMode == InteractionMode.Pull && r)
+        }
+        // Conundrum, UI shows original player's interactrion mode but for multiple? (maybe just drop the idea of differing interactions, Compromise your idea!)
+        UpdateInteractionModeUI(originalPlayerReticle);
+    }*/
+
+    public void SetInteractionLists(List<InteractionMode> modeList)
+    {
+        foreach (InteractionReticle r in interactionHandler.Reticles)
+        {
+            Debug.Log(r);
+            r.CurrentInteraction = 0;
+            r.AvailableInteractions = modeList;
+            r.InteractionMode = r.AvailableInteractions[0];
+        }
     }
 }

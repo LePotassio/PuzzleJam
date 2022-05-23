@@ -91,4 +91,9 @@ public class PlayerMovement : MonoBehaviour
         yield return new WaitForSeconds(GameSettings.ChangeDirectionDelay);
         isChangingDir = false;
     }
+
+    private void OnDestroy()
+    {
+        GameManager.Instance.PlayerMovements.Remove(this);
+    }
 }

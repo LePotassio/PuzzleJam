@@ -7,6 +7,9 @@ public class GameLayers : MonoBehaviour
     [SerializeField]
     private LayerMask tileLayer;
 
+    [SerializeField]
+    private LayerMask camBoxLayer;
+
     public static GameLayers Instance { get; set; }
 
     private void Awake()
@@ -17,5 +20,10 @@ public class GameLayers : MonoBehaviour
     public LayerMask TileLayer
     {
         get => tileLayer;
+    }
+
+    public LayerMask CamBoxLayer
+    {
+        get => camBoxLayer;
     }
 }

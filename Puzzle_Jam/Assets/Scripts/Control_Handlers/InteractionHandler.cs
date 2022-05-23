@@ -18,6 +18,11 @@ public class InteractionHandler : MonoBehaviour
     {
         foreach (InteractionReticle reticle in reticles)
         {
+            if (GameSettings.Instance.GetKeyBindingDown(KeyButtons.SwapInteraction))
+            {
+                SwapToNextInteractionMode(reticle);
+            }
+
             if (reticle.InteractionMode == InteractionMode.None)
                 return;
 
@@ -69,7 +74,23 @@ public class InteractionHandler : MonoBehaviour
         reticles = new List<InteractionReticle>();
     }
 
-    //public enum InteractionIDs { NoInteraction, Pull, Release };
+    public void SwapToNextInteractionMode(InteractionReticle r)
+    {
+        InteractionReticle originalPlayerReticle = GameManager.Instance.StartingPlayerRef.GetComponentInChildren<InteractionReticle>();
+        if (originalPlayerReticle.InteractionMode == InteractionMode.Release)
+            return;
+        if (r.InteractionMode == InteractionMode.Release)
+            return;
+        r.CurrentInteraction++;
+        if (r.CurrentInteraction > r.AvailableInteractions.Count - 1)
+            r.CurrentInteraction = 0;
+        r.InteractionMode = r.AvailableInteractions[r.CurrentInteraction];
+        // Conundrum, UI shows original player's interactrion mode but for multiple? (maybe just drop the idea of differing interactions, Compromise your idea!)
+        if (r == originalPlayerReticle)
+            GameManager.Instance.UpdateInteractionModeUI(originalPlayerReticle);
+    }
+
+    //public enum InteractionIDs { NoInteraction, Pull, Release }; May want to simplify this as class separation really is not useful here...
     public Dictionary<InteractionMode, Interaction> Interactions = new Dictionary<InteractionMode, Interaction> {
         { InteractionMode.None, null },
         { InteractionMode.Pull, new Grab() },

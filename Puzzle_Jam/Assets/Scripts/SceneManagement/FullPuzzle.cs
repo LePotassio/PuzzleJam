@@ -11,6 +11,9 @@ public class FullPuzzle : MonoBehaviour
     [SerializeField]
     private LevelWarp onCompleteWarp;
 
+    [SerializeField]
+    private List<InteractionMode> levelStartingInteractionModes = new List<InteractionMode> { InteractionMode.None };
+
     public LevelWarp OnCompletionWarp
     {
         get { return onCompleteWarp; }
@@ -28,5 +31,7 @@ public class FullPuzzle : MonoBehaviour
         // Set Sidebar UI
 
         GameManager.Instance.CurrentPuzzle = this;
+        GameManager.Instance.SetInteractionLists(levelStartingInteractionModes);
+        GameManager.Instance.UpdateInteractionModeUI();
     }
 }

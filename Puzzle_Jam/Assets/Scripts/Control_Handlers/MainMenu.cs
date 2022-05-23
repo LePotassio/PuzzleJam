@@ -9,9 +9,10 @@ public class MainMenu : MonoBehaviour
     // New game, load game, options, quit
 
     [SerializeField]
-    GameObject mainMenu;
+    private GameObject buttonHolder;
 
     // Can be replaced with image or menuitem script later
+    [SerializeField]
     List<Text> menuItems;
 
     int selectedItem;
@@ -19,25 +20,24 @@ public class MainMenu : MonoBehaviour
     private void Awake()
     {
         selectedItem = 0;
-        menuItems = new List<Text>();
     }
 
     private void Start()
     {
-        menuItems = mainMenu.GetComponentsInChildren<Text>().ToList();
+        menuItems = buttonHolder.GetComponentsInChildren<Text>().ToList();
         OpenMenu();
     }
 
     public void OpenMenu()
     {
-        mainMenu.SetActive(true);
-        GameManager.Instance.MainMenu = this;
+        gameObject.SetActive(true);
+        //GameManager.Instance.MainMenu = this;
         UpdateItemSelection();
     }
 
     public void CloseMenu()
     {
-        mainMenu?.SetActive(false);
+        gameObject.SetActive(false);
     }
 
     public void DoUpdate()
@@ -62,7 +62,7 @@ public class MainMenu : MonoBehaviour
 
         if (GameSettings.Instance.GetKeyBindingDown(KeyButtons.MenuSelect))
         {
-            menuItems[selectedItem].GetComponent<IMenuItem>().MenuSelect();
+            menuItems[selectedItem].GetComponent<IMenuItem>()?.MenuSelect();
         }
     }
 
@@ -79,10 +79,5 @@ public class MainMenu : MonoBehaviour
                 menuItems[i].color = Color.black;
             }
         }
-    }
-
-    private void OnDestroy()
-    {
-        GameManager.Instance.MainMenu = null;
     }
 }

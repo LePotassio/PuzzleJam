@@ -19,6 +19,12 @@ public class InteractionReticle : MonoBehaviour
     [SerializeField]
     private InteractionMode interactionMode;
 
+    [SerializeField]
+    private List<InteractionMode> availableInteractions = new List<InteractionMode>() { InteractionMode.None };
+
+    [SerializeField]
+    private int currentInteraction;
+
     public Puzzle_Element AimerElement
     {
         get { return aimerElement; }
@@ -38,6 +44,18 @@ public class InteractionReticle : MonoBehaviour
                 SwitchReticleSprite(value);
             interactionMode = value;
         }
+    }
+
+    public List<InteractionMode> AvailableInteractions
+    {
+        get { return availableInteractions; }
+        set { availableInteractions = value; }
+    }
+
+    public int CurrentInteraction
+    {
+        get { return currentInteraction; }
+        set { currentInteraction = value; }
     }
 
     private void Awake()

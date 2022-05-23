@@ -39,4 +39,9 @@ public class WinCondition : MonoBehaviour
 
         return true;
     }
+
+    private void OnDestroy()
+    {
+        GameManager.Instance.CurrentWinConditions.Remove(this);
+    }
 }
