@@ -1321,7 +1321,9 @@ MonoBehaviour:
   currentWinConditions: []
   currentPuzzle: {fileID: 0}
   mainCamera: {fileID: 3746589424797894096}
+  mainCameraSpeed: 1
   startingPlayerRef: {fileID: 0}
+  currentCamBoxes: []
 --- !u!114 &3746589424558225970
 MonoBehaviour:
   m_ObjectHideFlags: 0

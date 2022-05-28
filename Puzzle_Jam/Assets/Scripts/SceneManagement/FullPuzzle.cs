@@ -26,11 +26,14 @@ public class FullPuzzle : MonoBehaviour
 
     void Start()
     {
-        GameManager.Instance.RecenterCamera(gameObject);
+        //GameManager.Instance.RecenterCamera(CameraState.Instant);
 
         // Set Sidebar UI
 
         GameManager.Instance.CurrentPuzzle = this;
+
+        StartCoroutine(GameManager.Instance.CenterCameraAfterLoad());
+
         GameManager.Instance.SetInteractionLists(levelStartingInteractionModes);
         GameManager.Instance.UpdateInteractionModeUI();
     }

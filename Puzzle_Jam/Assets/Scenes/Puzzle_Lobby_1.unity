@@ -245,6 +245,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1920733285}
     m_Modifications:
+    - target: {fileID: 1107263601702286962, guid: 51cedc8ad8e39e746aaf5cea60b2b69f, type: 3}
+      propertyPath: camSize
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 4778686856488725876, guid: 51cedc8ad8e39e746aaf5cea60b2b69f, type: 3}
       propertyPath: m_Name
       value: puzzlle_Lobby_2
@@ -838,6 +842,71 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 876ac28606050a443bc51750bf730278, type: 3}
+--- !u!1001 &1108871832
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 579271875}
+    m_Modifications:
+    - target: {fileID: 2015008987162536675, guid: d2dc98661c0394447853906fb15c2ebe, type: 3}
+      propertyPath: warpPos.x
+      value: -7
+      objectReference: {fileID: 0}
+    - target: {fileID: 2015008987162536675, guid: d2dc98661c0394447853906fb15c2ebe, type: 3}
+      propertyPath: warpPos.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5735903809888122936, guid: d2dc98661c0394447853906fb15c2ebe, type: 3}
+      propertyPath: m_Name
+      value: PlayerWarp (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 5735903809888122938, guid: d2dc98661c0394447853906fb15c2ebe, type: 3}
+      propertyPath: m_RootOrder
+      value: 34
+      objectReference: {fileID: 0}
+    - target: {fileID: 5735903809888122938, guid: d2dc98661c0394447853906fb15c2ebe, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 10.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5735903809888122938, guid: d2dc98661c0394447853906fb15c2ebe, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5735903809888122938, guid: d2dc98661c0394447853906fb15c2ebe, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5735903809888122938, guid: d2dc98661c0394447853906fb15c2ebe, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5735903809888122938, guid: d2dc98661c0394447853906fb15c2ebe, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5735903809888122938, guid: d2dc98661c0394447853906fb15c2ebe, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5735903809888122938, guid: d2dc98661c0394447853906fb15c2ebe, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5735903809888122938, guid: d2dc98661c0394447853906fb15c2ebe, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5735903809888122938, guid: d2dc98661c0394447853906fb15c2ebe, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5735903809888122938, guid: d2dc98661c0394447853906fb15c2ebe, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: d2dc98661c0394447853906fb15c2ebe, type: 3}
 --- !u!1001 &1267622335
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1485,6 +1554,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1920733285}
     m_Modifications:
+    - target: {fileID: 1107263601702286962, guid: 51cedc8ad8e39e746aaf5cea60b2b69f, type: 3}
+      propertyPath: camSize
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 4778686856488725876, guid: 51cedc8ad8e39e746aaf5cea60b2b69f, type: 3}
       propertyPath: m_Name
       value: puzzle_Lobby_1

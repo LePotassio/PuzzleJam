@@ -95,5 +95,7 @@ public class PlayerMovement : MonoBehaviour
     private void OnDestroy()
     {
         GameManager.Instance.PlayerMovements.Remove(this);
+        if (GameManager.Instance.StartingPlayerRef == this)
+            GameManager.Instance.StartingPlayerRef = null;
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 public enum GameState { PlayerMove, MoveStandby, MoveResolution, PuzzleSolved, PauseMenu, TitleMenu, SaveMenu, LoadMenu };
 
-public enum CameraState { PuzzleLocked, Follow };
+public enum CameraState { Smooth, Instant };
 
 /// <summary>
 /// The game manager is a singleton class that keeps track of the update loop
@@ -54,7 +54,7 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private Camera mainCamera;
 
-    private CameraState cameraMode = CameraState.PuzzleLocked;
+    private CameraState cameraMode = CameraState.Smooth;
 
     //[SerializeField]
     private SaveFileProgress saveFileProgress;
@@ -68,6 +68,20 @@ public class GameManager : MonoBehaviour
     private GameState pausedStateCache;
 
     private int buildSceneCount;
+
+    // List of cameraboxes the player is currently active in (the camera should always move towards the highest precedent camera box center)
+    [SerializeField]
+    private List<CamBox> currentCamBoxes;
+
+    private Vector3 camTarget;
+
+    private CamBox camBoxTarget;
+
+    private float camSizeTarget;
+
+    private float camSizeTimer = 0;
+
+    private float startingCamSize;
 
     public List<PlayerMovement> PlayerMovements
     {
@@ -138,8 +152,13 @@ public class GameManager : MonoBehaviour
         set
         {
             cameraMode = value;
-            RecenterCameraToBox();
+            // RecenterCameraToBox();
         }
+    }
+
+    public List<CamBox> CurrentCamBoxes
+    {
+        get { return currentCamBoxes; }
     }
 
     private void Awake()
@@ -219,10 +238,16 @@ public class GameManager : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (cameraMode == CameraState.Follow && startingPlayerRef)
+        // Check if camBoxlist empty, set to highest precedent and if empty just set to player pos;
+        /*if (cameraMode == CameraState.Follow && startingPlayerRef)
         {
             Vector3 targ = startingPlayerRef.transform.position;
             mainCamera.transform.position = new Vector3(targ.x, targ.y, -10);
+        }*/
+        if (state != GameState.TitleMenu && state != GameState.PauseMenu && state != GameState.SaveMenu && state != GameState.LoadMenu)
+        {
+            SetCameraTarget();
+            RecenterCamera(cameraMode);
         }
     }
 
@@ -296,7 +321,7 @@ public class GameManager : MonoBehaviour
     }
 
     // Will need to be changed to find nearest grid center and then center to that...
-    public void RecenterCamera(GameObject center)
+    /*public void RecenterCamera(GameObject center)
     {
         if (cameraMode == CameraState.PuzzleLocked) // Can change this later for camera size and smooth cahnging (smoothly lerp to terget position in update to avoid coroutine cancellation hassle)
             mainCamera.transform.position = new Vector3(center.transform.position.x, center.transform.position.y, -10);
@@ -307,6 +332,100 @@ public class GameManager : MonoBehaviour
         var cb = Physics2D.OverlapCircle(startingPlayerRef.transform.position, 0.15f, GameLayers.Instance.CamBoxLayer);
         if (cb)
             RecenterCamera(cb.gameObject);
+    }*/
+
+    public void RecenterCamera(CameraState camState)
+    {
+        if (camState == CameraState.Instant)
+        {
+            RecenterCameraInstant();
+        }
+        else if (camState == CameraState.Smooth)
+        {
+            RecenterCameraPositionSmooth();
+            RecenterCameraSizeSmooth();
+        }
+    }
+
+    public void RecenterCameraInstant()
+    {
+        mainCamera.transform.position = camTarget;
+        mainCamera.orthographicSize = camSizeTarget;
+    }
+
+    public void RecenterCameraPositionSmooth()
+    {
+        // Position stuff
+        if ((camTarget - mainCamera.transform.position).sqrMagnitude > Mathf.Epsilon)
+            mainCamera.transform.position = Vector3.Lerp(mainCamera.transform.position, camTarget, Time.deltaTime * GameSettings.MainCameraSpeed);
+        else
+            mainCamera.transform.position = camTarget;
+    }
+
+    public void RecenterCameraSizeSmooth()
+    {
+        // Size stuff
+        // "Lerp" the size of the camera, but without knowing the time it takes...
+        if (Mathf.Abs(camSizeTarget - mainCamera.orthographicSize) > Mathf.Epsilon)
+        {
+            camSizeTimer += Time.deltaTime * GameSettings.MainCameraSizeSpeed;
+            mainCamera.orthographicSize = Mathf.SmoothStep(startingCamSize, camSizeTarget, camSizeTimer);
+        }
+        else
+        {
+            mainCamera.orthographicSize = camSizeTarget;
+        }
+    }
+
+    public CamBox GetPriorityCamBox()
+    {
+        if (currentCamBoxes.Count == 0)
+            return null;
+
+        CamBox max = currentCamBoxes[0];
+
+        foreach (CamBox cb in currentCamBoxes)
+        {
+            if (cb.Precedence > max.Precedence) // Prioritizes first found if precedent matches
+                max = cb;
+        }
+
+        return max;
+    }
+
+    public void SetCameraTarget()
+    {
+        CamBox targBox = GetPriorityCamBox();
+        if (camBoxTarget != targBox)
+        {
+            camSizeTimer = 0;
+            startingCamSize = mainCamera.orthographicSize;
+        }
+        camBoxTarget = targBox;
+
+
+        if (targBox)
+        {
+            camTarget = targBox.CamPos;
+            camSizeTarget = targBox.CamSize;
+        }
+        else if (startingPlayerRef)
+        {
+            camTarget = new Vector3(startingPlayerRef.transform.position.x, startingPlayerRef.transform.position.y, -10);
+            camSizeTarget = GameSettings.DefaultCamSize;
+        }
+        else
+        {
+            camTarget = mainCamera.transform.position;
+        }
+    }
+
+    public IEnumerator CenterCameraAfterLoad()
+    {
+        // Issue: Camboxes not loading and colliding in time sometimes but also need case where there are no camboxes to load
+        yield return new WaitUntil(() => StartingPlayerRef);
+        SetCameraTarget();
+        RecenterCamera(CameraState.Instant);
     }
 
     public void StartMainMenu()
@@ -433,7 +552,7 @@ public class GameManager : MonoBehaviour
     {
         foreach (InteractionReticle r in interactionHandler.Reticles)
         {
-            Debug.Log(r);
+            // Debug.Log(r);
             r.CurrentInteraction = 0;
             r.AvailableInteractions = modeList;
             r.InteractionMode = r.AvailableInteractions[0];

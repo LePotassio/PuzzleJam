@@ -20,6 +20,11 @@ public class GameSettings : MonoBehaviour
 
     public static float ChangeDirectionDelay = .15f;
 
+    public static float DefaultCamSize = 5f;
+
+    public static float MainCameraSpeed = 1f;
+
+    public static float MainCameraSizeSpeed = 1f;
 
     // KeyControls
 
