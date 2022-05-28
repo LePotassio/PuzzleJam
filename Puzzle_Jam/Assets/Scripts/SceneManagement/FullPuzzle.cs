@@ -32,7 +32,7 @@ public class FullPuzzle : MonoBehaviour
 
         GameManager.Instance.CurrentPuzzle = this;
 
-        StartCoroutine(GameManager.Instance.CenterCameraAfterLoad());
+        // StartCoroutine(GameManager.Instance.CenterCameraAfterLoad());
 
         GameManager.Instance.SetInteractionLists(levelStartingInteractionModes);
         GameManager.Instance.UpdateInteractionModeUI();

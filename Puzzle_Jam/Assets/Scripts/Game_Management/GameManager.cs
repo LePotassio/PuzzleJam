@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public enum GameState { PlayerMove, MoveStandby, MoveResolution, PuzzleSolved, PauseMenu, TitleMenu, SaveMenu, LoadMenu };
+public enum GameState { PlayerMove, MoveStandby, MoveResolution, PuzzleSolved, PauseMenu, TitleMenu, SaveMenu, LoadMenu, LoadingScreen };
 
-public enum CameraState { Smooth, Instant };
+public enum CameraState { Smooth, Instant, Locked };
 
 /// <summary>
 /// The game manager is a singleton class that keeps track of the update loop
@@ -35,6 +35,9 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     private PauseMenu saveMenu;
+
+    [SerializeField]
+    private LoadingScreen loadingScreen;
 
     [SerializeField]
     private PuzzleUI puzzleUI;
@@ -176,6 +179,8 @@ public class GameManager : MonoBehaviour
     {
         pauseMenu.gameObject.SetActive(false);
         saveMenu.gameObject.SetActive(false);
+        loadingScreen.gameObject.SetActive(false);
+
 
         if (SceneManager.GetActiveScene().name == "MainMenu")
         {
@@ -276,19 +281,26 @@ public class GameManager : MonoBehaviour
         state = GameState.PlayerMove;
     }
 
+    // Be very cautious of code after this function where called!
     public void SwitchLevel(string sceneName, PlayerPositionSave startingPlayerPosOverride = null)
     {
-        Scene curScene = SceneManager.GetActiveScene();
+        State = GameState.LoadingScreen;
+        CameraMode = CameraState.Locked;
+        StartCoroutine(SwitchLevelASync(sceneName, startingPlayerPosOverride));
+    }
+    
+    public IEnumerator SwitchLevelASync(string sceneName, PlayerPositionSave startingPlayerPosOverride = null)
+    {
         // Unload old scene
-        //SceneManager.UnloadSceneAsync(curScene);
         // Transition and camera enabling/disabling
 
         ClearGameManager();// Keep in mind, this could lead to suspended time for handlers... would need to wait for scene to load...
-        
+
         // Wait for load issue: Need to wait for all references to be setup, and cant load before unload
 
         // Load new scene
-        SceneManager.LoadScene(sceneName);
+        //SceneManager.LoadScene(sceneName);
+        yield return LoadSceneWithTransition(sceneName);
 
         StartCoroutine(UpdateCurrentPuzzleUI());
 
@@ -417,6 +429,7 @@ public class GameManager : MonoBehaviour
         else
         {
             camTarget = mainCamera.transform.position;
+            camSizeTarget = mainCamera.orthographicSize;
         }
     }
 
@@ -430,19 +443,35 @@ public class GameManager : MonoBehaviour
 
     public void StartMainMenu()
     {
+        State = GameState.LoadingScreen;
+        CameraMode = CameraState.Locked;
+        StartCoroutine(StartMainMenuAsync());
+    }
+
+    public IEnumerator StartMainMenuAsync()
+    {
         pauseMenu.gameObject.SetActive(false);
-        SceneManager.LoadScene("MainMenu");
+        //SceneManager.LoadScene("MainMenu");
+        yield return LoadSceneWithTransition("MainMenu");
         MainMenu.OpenMenu();
         State = GameState.TitleMenu;
     }
 
     public void StartNewGame()
     {
-        SceneManager.LoadScene("Puzzle_Lobby_1");
+        State = GameState.LoadingScreen;
+        CameraMode = CameraState.Locked;
+        StartCoroutine(StartNewGameAsync());
+    }
+
+    public IEnumerator StartNewGameAsync()
+    {
+        saveFileProgress = new SaveFileProgress();
+        // SceneManager.LoadScene("Puzzle_Lobby_1");
+        yield return LoadSceneWithTransition("Puzzle_Lobby_1");
         puzzleUI.gameObject.SetActive(true);
         StartCoroutine(UpdateCurrentPuzzleUI());
         MainMenu.CloseMenu();
-        saveFileProgress = new SaveFileProgress();
         State = GameState.PlayerMove;
     }
 
@@ -456,10 +485,19 @@ public class GameManager : MonoBehaviour
 
     public void LoadGame(int saveSlot)
     {
+        State = GameState.LoadingScreen;
+        CameraMode = CameraState.Locked;
+        StartCoroutine(LoadGameAsync(saveSlot));
+    }
+
+    public IEnumerator LoadGameAsync(int saveSlot)
+    {
         saveFileProgress = SaveSystem.LoadProgress(saveSlot);
 
         //Temporary until checkpoints
-        SceneManager.LoadScene("Puzzle_Lobby_1");
+        // SceneManager.LoadScene("Puzzle_Lobby_1");
+
+        yield return LoadSceneWithTransition("Puzzle_Lobby_1");
 
         puzzleUI.gameObject.SetActive(true);
         StartCoroutine(UpdateCurrentPuzzleUI());
@@ -557,5 +595,46 @@ public class GameManager : MonoBehaviour
             r.AvailableInteractions = modeList;
             r.InteractionMode = r.AvailableInteractions[0];
         }
+    }
+
+
+    public IEnumerator LoadSceneWithTransition(string newSceneName)
+    {
+        // State = GameState.LoadingScreen;
+
+        yield return loadingScreen.OpenLoadingScreen();
+
+        // async load limbo scene
+        AsyncOperation loadZoneOp = SceneManager.LoadSceneAsync("LoadingZone");
+        //yield return new WaitUntil(() => loadZoneOp.isDone);
+        while (!loadZoneOp.isDone)
+        {
+            yield return null;
+        }
+        //SceneManager.SetActiveScene();
+
+        // async unload old scene
+        //SceneManager.UnloadSceneAsync(SceneManager.GetActiveScene().buildIndex);
+
+        // async load new scene
+        AsyncOperation newOp = SceneManager.LoadSceneAsync(newSceneName);
+        //newOp.allowSceneActivation =  false;
+
+        // can put activation stall for continue prompt hereSceneManager.UnloadSceneAsync("LoadingZone");...
+
+        yield return new WaitUntil(() => newOp.isDone);
+
+        //SceneManager.UnloadSceneAsync("LoadingZone");
+        //newOp.allowSceneActivation = true;
+
+        yield return new WaitForSeconds(.1f); // For letting player get set before camera instant shift (seems iffy, could fail on super slow computers)
+        RecenterCamera(CameraState.Instant);
+
+        // may need to cache if instant is used consistantly
+        CameraMode = CameraState.Smooth;
+
+        yield return loadingScreen.CloseLoadingScreen();
+
+        // State = stateAfter;
     }
 }
