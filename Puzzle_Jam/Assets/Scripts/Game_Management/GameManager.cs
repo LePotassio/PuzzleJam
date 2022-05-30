@@ -200,6 +200,8 @@ public class GameManager : MonoBehaviour
         {
             if (state == GameState.PauseMenu)
                 ResumeGame();
+            else if (state == GameState.SaveMenu)
+                CloseSaveMenu();
             else
                 PauseGame();
         }
@@ -213,15 +215,14 @@ public class GameManager : MonoBehaviour
         {
             Debug.Log("A winner is you!");
             // You win goes here
-
-            SaveFileProgress.LevelCompletions[SceneManager.GetActiveScene().name] = LevelStatus.Completed;
+            SaveFileProgress.SetLevelStatus(SceneManager.GetActiveScene().name, LevelStatus.Completed);
 
             // Then swap back to level select
             LevelWarp onCompletionWarp = currentPuzzle.OnCompletionWarp;
             if (!onCompletionWarp.OverrideStartingPosition)
-                SwitchLevel(onCompletionWarp.SceneToLoad);
+                SwitchLevel(onCompletionWarp.SceneToLoad, null, onCompletionWarp.StartingGamestate);
             else
-                SwitchLevel(onCompletionWarp.SceneToLoad, onCompletionWarp.SinglePositionOverride);
+                SwitchLevel(onCompletionWarp.SceneToLoad, onCompletionWarp.SinglePositionOverride, onCompletionWarp.StartingGamestate);
         }
         else if (state == GameState.TitleMenu)
         {
@@ -282,14 +283,14 @@ public class GameManager : MonoBehaviour
     }
 
     // Be very cautious of code after this function where called!
-    public void SwitchLevel(string sceneName, PlayerPositionSave startingPlayerPosOverride = null)
+    public void SwitchLevel(string sceneName, PlayerPositionSave startingPlayerPosOverride = null, GameState stateAfterLoad = GameState.PlayerMove)
     {
         State = GameState.LoadingScreen;
         CameraMode = CameraState.Locked;
-        StartCoroutine(SwitchLevelASync(sceneName, startingPlayerPosOverride));
+        StartCoroutine(SwitchLevelASync(sceneName, startingPlayerPosOverride, stateAfterLoad));
     }
     
-    public IEnumerator SwitchLevelASync(string sceneName, PlayerPositionSave startingPlayerPosOverride = null)
+    public IEnumerator SwitchLevelASync(string sceneName, PlayerPositionSave startingPlayerPosOverride = null, GameState stateAfterLoad = GameState.PlayerMove)
     {
         // Unload old scene
         // Transition and camera enabling/disabling
@@ -305,7 +306,9 @@ public class GameManager : MonoBehaviour
         StartCoroutine(UpdateCurrentPuzzleUI());
 
         if (startingPlayerPosOverride != null)
-            StartCoroutine(OverrideStartingPlayerPos(startingPlayerPosOverride));
+            yield return OverrideStartingPlayerPos(startingPlayerPosOverride);
+
+        State = stateAfterLoad;
     }
 
     public void ClearGameManager()
@@ -318,7 +321,7 @@ public class GameManager : MonoBehaviour
         winDelay = true;
         startingPlayerRef = null;
 
-        State = GameState.PlayerMove;
+        //State = GameState.PlayerMove;
     }
 
     public IEnumerator OverrideStartingPlayerPos(PlayerPositionSave startingPlayerPos)

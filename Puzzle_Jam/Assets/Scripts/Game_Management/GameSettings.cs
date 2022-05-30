@@ -65,4 +65,10 @@ public class GameSettings : MonoBehaviour
 
         return false;
     }
+
+    // Can add main menu states here for having main menu anywhere...
+    public bool TimePausedState()
+    {
+        return GameManager.Instance.State == GameState.PauseMenu || GameManager.Instance.State == GameState.SaveMenu;
+    }
 }

@@ -14,6 +14,9 @@ public class FullPuzzle : MonoBehaviour
     [SerializeField]
     private List<InteractionMode> levelStartingInteractionModes = new List<InteractionMode> { InteractionMode.None };
 
+    [SerializeField]
+    private bool isCheckpoint = false;
+
     public LevelWarp OnCompletionWarp
     {
         get { return onCompleteWarp; }
@@ -31,6 +34,9 @@ public class FullPuzzle : MonoBehaviour
         // Set Sidebar UI
 
         GameManager.Instance.CurrentPuzzle = this;
+
+        if (GameManager.Instance.SaveFileProgress.GetLevelStatus(SceneManager.GetActiveScene().name) != LevelStatus.Completed)
+            GameManager.Instance.SaveFileProgress.SetLevelStatus(SceneManager.GetActiveScene().name, LevelStatus.Started);
 
         // StartCoroutine(GameManager.Instance.CenterCameraAfterLoad());
 

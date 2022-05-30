@@ -120,9 +120,11 @@ public class Movable : MonoBehaviour
             attachedMov.ProcAllMovements(dirVec);
         }
 
-        yield return new WaitUntil(() => GameManager.Instance.QueuedMoves.Count == 0 && GameManager.Instance.State != GameState.PauseMenu);
+        yield return new WaitUntil(() => GameManager.Instance.QueuedMoves.Count == 0 && !GameSettings.Instance.TimePausedState());
 
-        ls?.ActivateLevelSelect();
+        GameState s = GameManager.Instance.State;
+        if (s == GameState.MoveResolution || s == GameState.PlayerMove || s == GameState.MoveStandby)
+            ls?.ActivateLevelSelect();
 
         foreach (var warp in queuedWarps)
         {

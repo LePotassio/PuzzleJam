@@ -16,6 +16,9 @@ public class LevelWarp
     [SerializeField]
     private string sceneToLoad;
 
+    [SerializeField]
+    private GameState startingGamestate = GameState.PlayerMove;
+
     // WARNING: Do not use this if multiple objects are the player! (Or make one a dominant "Player using a tag?")
     [Header("Starting Player Object Override")]
     [SerializeField]
@@ -32,6 +35,11 @@ public class LevelWarp
     public string SceneToLoad
     {
         get { return sceneToLoad; }
+    }
+
+    public GameState StartingGamestate
+    {
+        get { return startingGamestate; }
     }
 
     public bool OverrideStartingPosition

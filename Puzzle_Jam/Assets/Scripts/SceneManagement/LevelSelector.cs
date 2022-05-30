@@ -27,8 +27,7 @@ public class LevelSelector : MonoBehaviour
     {
         sr = GetComponentInChildren<SpriteRenderer>();
 
-        // TO DO: Set image to correspond to level status...
-        LevelStatus status = GameManager.Instance.SaveFileProgress.LevelCompletions[levelWarp.SceneToLoad];
+        LevelStatus status = GameManager.Instance.SaveFileProgress.GetLevelStatus(levelWarp.SceneToLoad);
 
         switch (status)
         {
