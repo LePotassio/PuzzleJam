@@ -326,7 +326,7 @@ public class GameManager : MonoBehaviour
 
     public IEnumerator OverrideStartingPlayerPos(PlayerPositionSave startingPlayerPos)
     {
-        // Assume we always have a starting player ref if we are overriding its position...
+        // Assume we always have a starting player ref if we are overriding its position...// Potentially can be removed
         yield return new WaitUntil(() => startingPlayerRef != null);
 
         startingPlayerRef.transform.position = startingPlayerPos.SinglePositionOverride;
@@ -500,7 +500,11 @@ public class GameManager : MonoBehaviour
         //Temporary until checkpoints
         // SceneManager.LoadScene("Puzzle_Lobby_1");
 
-        yield return LoadSceneWithTransition("Puzzle_Lobby_1");
+        yield return LoadSceneWithTransition(saveFileProgress.CheckpointSceneName);
+
+        (float, float) spawnPos = saveFileProgress.CheckpointSpawnLocation;
+        startingPlayerRef.transform.position = new Vector3(spawnPos.Item1, spawnPos.Item2, 0);
+        startingPlayerRef.GetComponent<MovableSnapAssign>().SnapToCenter();
 
         puzzleUI.gameObject.SetActive(true);
         StartCoroutine(UpdateCurrentPuzzleUI());

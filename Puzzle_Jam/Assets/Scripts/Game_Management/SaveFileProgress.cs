@@ -12,19 +12,36 @@ public class SaveFileProgress
     // Save after any progress, any screen change, savepoint?
 
     private string checkpointSceneName;
-    private (int, int) checkpointSpawnLocation;
+    private (float, float) checkpointSpawnLocation;
 
     private Dictionary<string, LevelStatus> levelCompletions;
+
+    public string CheckpointSceneName
+    {
+        get { return checkpointSceneName; }
+    }
+
+    public (float, float) CheckpointSpawnLocation
+    {
+        get { return checkpointSpawnLocation; }
+    }
 
     public Dictionary<string, LevelStatus> LevelCompletions
     {
         get { return levelCompletions; }
     }
 
+    public void SetCheckpoint(string newCheckpointScene, Vector2 newSpawnLocation)
+    {
+        checkpointSceneName = newCheckpointScene;
+        checkpointSpawnLocation = (newSpawnLocation.x, newSpawnLocation.y);
+    }
+
     public SaveFileProgress()
     {
         levelCompletions = new Dictionary<string, LevelStatus>();
-
+        checkpointSceneName = "Puzzle_Lobby_1";
+        checkpointSpawnLocation = (-3.5f, -.5f);
         // Unless there is a save file... Or rather check loaded list from file for scene name... Or just do it after...
         /*for (int i = 0; i < GameManager.Instance.BuildSceneCount; i++)
         {
