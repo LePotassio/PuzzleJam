@@ -16,7 +16,6 @@ public class CheckPointSetter : MonoBehaviour
             SaveFileProgress p = GameManager.Instance.SaveFileProgress;
 
             p.SetCheckpoint(SceneManager.GetActiveScene().name, checkPointSpawnLocation);
-
             // could put auto save here plus on level completion...
         }
     }

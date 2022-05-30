@@ -500,16 +500,14 @@ public class GameManager : MonoBehaviour
         //Temporary until checkpoints
         // SceneManager.LoadScene("Puzzle_Lobby_1");
 
-        yield return LoadSceneWithTransition(saveFileProgress.CheckpointSceneName);
-
-        (float, float) spawnPos = saveFileProgress.CheckpointSpawnLocation;
-        startingPlayerRef.transform.position = new Vector3(spawnPos.Item1, spawnPos.Item2, 0);
-        startingPlayerRef.GetComponent<MovableSnapAssign>().SnapToCenter();
+        yield return LoadSceneWithTransition(saveFileProgress.CheckpointSceneName, new PlayerPositionSave(new Vector2(saveFileProgress.CheckpointSpawnLocation.Item1, saveFileProgress.CheckpointSpawnLocation.Item2)));
 
         puzzleUI.gameObject.SetActive(true);
         StartCoroutine(UpdateCurrentPuzzleUI());
         MainMenu.CloseMenu();
         loadMenu.CloseMenu();
+
+        // Could go into small load flavor here like waking up from resting... (state would need to not be player move initially...)
         State = GameState.PlayerMove;
 
         Debug.Log($"Loaded from save slot {saveSlot}");
@@ -605,7 +603,7 @@ public class GameManager : MonoBehaviour
     }
 
 
-    public IEnumerator LoadSceneWithTransition(string newSceneName)
+    public IEnumerator LoadSceneWithTransition(string newSceneName, PlayerPositionSave posOverride = null)
     {
         // State = GameState.LoadingScreen;
 
@@ -633,6 +631,14 @@ public class GameManager : MonoBehaviour
 
         //SceneManager.UnloadSceneAsync("LoadingZone");
         //newOp.allowSceneActivation = true;
+
+        if (posOverride != null)
+        {
+            (float, float) spawnPos = saveFileProgress.CheckpointSpawnLocation;
+            startingPlayerRef.transform.position = new Vector3(spawnPos.Item1, spawnPos.Item2, 0);
+            startingPlayerRef.GetComponent<MovableSnapAssign>().SnapToCenter();
+        }
+
 
         yield return new WaitForSeconds(.1f); // For letting player get set before camera instant shift (seems iffy, could fail on super slow computers)
         RecenterCamera(CameraState.Instant);

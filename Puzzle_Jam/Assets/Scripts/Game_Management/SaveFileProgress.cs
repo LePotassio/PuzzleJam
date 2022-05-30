@@ -11,6 +11,8 @@ public class SaveFileProgress
     // In addition to level progress, also want scene and location of savepoint, to be then saved to text doc (make temp to avoid save corruption)
     // Save after any progress, any screen change, savepoint?
 
+    // Assumption: No saving during cutscenes, just checkpoint before and after...
+
     private string checkpointSceneName;
     private (float, float) checkpointSpawnLocation;
 
