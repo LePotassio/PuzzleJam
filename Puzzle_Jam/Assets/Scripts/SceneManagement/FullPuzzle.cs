@@ -14,9 +14,6 @@ public class FullPuzzle : MonoBehaviour
     [SerializeField]
     private List<InteractionMode> levelStartingInteractionModes = new List<InteractionMode> { InteractionMode.None };
 
-    [SerializeField]
-    private bool isCheckpoint = false;
-
     public LevelWarp OnCompletionWarp
     {
         get { return onCompleteWarp; }

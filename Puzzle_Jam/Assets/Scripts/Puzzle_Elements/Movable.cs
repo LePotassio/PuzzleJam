@@ -138,6 +138,8 @@ public class Movable : MonoBehaviour
         }
 
         // Could just directly move to win in Gamemanager... I think this way is more flexible though
+        if (GameManager.Instance.State == GameState.Cutscene)
+            yield break;
         if (!GameManager.Instance.CheckAllWinConditions())
             GameManager.Instance.State = GameState.PlayerMove;
         else

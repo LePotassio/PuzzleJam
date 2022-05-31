@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 
 
 public enum LevelStatus { New, Started, Completed }
+public enum CutsceneStatus { Unwatched, Watched }
 [System.Serializable]
 public class SaveFileProgress
 {
@@ -17,6 +18,8 @@ public class SaveFileProgress
     private (float, float) checkpointSpawnLocation;
 
     private Dictionary<string, LevelStatus> levelCompletions;
+
+    private Dictionary<string, CutsceneStatus> cutsceneCompletions;
 
     public string CheckpointSceneName
     {
@@ -33,6 +36,11 @@ public class SaveFileProgress
         get { return levelCompletions; }
     }
 
+    public Dictionary<string, CutsceneStatus> CutsceneCompletions
+    {
+        get { return cutsceneCompletions; }
+    }
+
     public void SetCheckpoint(string newCheckpointScene, Vector2 newSpawnLocation)
     {
         checkpointSceneName = newCheckpointScene;
@@ -42,7 +50,8 @@ public class SaveFileProgress
     public SaveFileProgress()
     {
         levelCompletions = new Dictionary<string, LevelStatus>();
-        checkpointSceneName = "Puzzle_Lobby_1";
+        cutsceneCompletions = new Dictionary<string, CutsceneStatus>();
+        checkpointSceneName = GameSettings.NewGameSceneName;
         checkpointSpawnLocation = (-3.5f, -.5f);
         // Unless there is a save file... Or rather check loaded list from file for scene name... Or just do it after...
         /*for (int i = 0; i < GameManager.Instance.BuildSceneCount; i++)
@@ -63,7 +72,7 @@ public class SaveFileProgress
     public LevelStatus GetLevelStatus(string levelSceneName)
     {
         if (levelCompletions.ContainsKey(levelSceneName))
-            return LevelCompletions[levelSceneName];
+            return levelCompletions[levelSceneName];
         else
             return LevelStatus.New;
     }
@@ -73,6 +82,22 @@ public class SaveFileProgress
         if (levelCompletions.ContainsKey(levelSceneName))
             levelCompletions[levelSceneName] = newStatus;
         else
-            levelCompletions.Add(SceneManager.GetActiveScene().name, LevelStatus.Completed);
+            levelCompletions.Add(levelSceneName, LevelStatus.Completed);
+    }
+
+    public CutsceneStatus GetCutsceneStatus(string cutsceneName)
+    {
+        if (cutsceneCompletions.ContainsKey(cutsceneName))
+            return cutsceneCompletions[cutsceneName];
+        else
+            return CutsceneStatus.Unwatched;
+    }
+
+    public void SetCutsceneStatus(string cutsceneName, CutsceneStatus newStatus)
+    {
+        if (cutsceneCompletions.ContainsKey(cutsceneName))
+            cutsceneCompletions[cutsceneName] = newStatus;
+        else
+            cutsceneCompletions.Add(cutsceneName, CutsceneStatus.Watched);
     }
 }

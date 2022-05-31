@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public enum GameState { PlayerMove, MoveStandby, MoveResolution, PuzzleSolved, PauseMenu, TitleMenu, SaveMenu, LoadMenu, LoadingScreen };
+public enum GameState { PlayerMove, MoveStandby, MoveResolution, PuzzleSolved, PauseMenu, TitleMenu, SaveMenu, LoadMenu, LoadingScreen, Cutscene };
 
 public enum CameraState { Smooth, Instant, Locked };
 
@@ -86,6 +86,11 @@ public class GameManager : MonoBehaviour
 
     private float startingCamSize;
 
+    // Cutscene Stuff
+    
+    private Cutscene currentCutscene;
+    
+
     public List<PlayerMovement> PlayerMovements
     {
         get { return player_movements; }
@@ -164,6 +169,12 @@ public class GameManager : MonoBehaviour
         get { return currentCamBoxes; }
     }
 
+    
+    public Cutscene CurrentCutscene
+    {
+        get { return currentCutscene; }
+    }
+
     private void Awake()
     {
         buildSceneCount = SceneManager.sceneCountInBuildSettings;
@@ -240,6 +251,10 @@ public class GameManager : MonoBehaviour
         {
             loadMenu.DoUpdate();
         }
+        else if (state == GameState.Cutscene)
+        {
+            currentCutscene?.DoUpdate();
+        }
     }
 
     private void LateUpdate()
@@ -279,7 +294,7 @@ public class GameManager : MonoBehaviour
     public IEnumerator WaitForMoveResolution()
     {
         yield return new WaitUntil(() => queuedMoves.Count == 0);
-        state = GameState.PlayerMove;
+        State = GameState.PlayerMove;
     }
 
     // Be very cautious of code after this function where called!
@@ -471,7 +486,7 @@ public class GameManager : MonoBehaviour
     {
         saveFileProgress = new SaveFileProgress();
         // SceneManager.LoadScene("Puzzle_Lobby_1");
-        yield return LoadSceneWithTransition("Puzzle_Lobby_1");
+        yield return LoadSceneWithTransition(GameSettings.NewGameSceneName);
         puzzleUI.gameObject.SetActive(true);
         StartCoroutine(UpdateCurrentPuzzleUI());
         MainMenu.CloseMenu();
@@ -649,5 +664,13 @@ public class GameManager : MonoBehaviour
         yield return loadingScreen.CloseLoadingScreen();
 
         // State = stateAfter;
+    }
+
+    public void StartCutscene(Cutscene cutscene)
+    {
+        GameState temp = State;
+        State = GameState.Cutscene;
+        currentCutscene = cutscene;
+        cutscene.DoCutscene(() => { State = temp; currentCutscene = null; cutscene.MarkCutsceneWatched(saveFileProgress); if (temp == GameState.MoveResolution && queuedMoves.Count == 0) State = GameState.PlayerMove; });
     }
 }

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum KeyButtons { Interact, MoveUp, MoveDown, MoveLeft, MoveRight, MenuUp, MenuDown, MenuSelect, PauseResume, SwapInteraction }
+public enum KeyButtons { Interact, MoveUp, MoveDown, MoveLeft, MoveRight, MenuUp, MenuDown, MenuSelect, PauseResume, SwapInteraction, AdvanceCutscene }
 
 public class GameSettings : MonoBehaviour
 {
@@ -26,6 +26,8 @@ public class GameSettings : MonoBehaviour
 
     public static float MainCameraSizeSpeed = 1f;
 
+    public static string NewGameSceneName = "Puzzle_Lobby_1";
+
     // KeyControls
 
     private static Dictionary<KeyButtons, List<KeyCode>> BindDict = new Dictionary<KeyButtons, List<KeyCode>>
@@ -40,6 +42,7 @@ public class GameSettings : MonoBehaviour
         { KeyButtons.MenuSelect, new List<KeyCode> { KeyCode.Space, KeyCode.E } },
         { KeyButtons.PauseResume, new List<KeyCode> { KeyCode.Escape } },
         { KeyButtons.SwapInteraction, new List<KeyCode> { KeyCode.X } },
+        { KeyButtons.AdvanceCutscene, new List<KeyCode> { KeyCode.Z, KeyCode.Space } },
     };
 
     public bool GetKeyBinding(KeyButtons kb)
