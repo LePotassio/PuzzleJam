@@ -13,7 +13,10 @@ public class MainMenu : MonoBehaviour
 
     // Can be replaced with image or menuitem script later
     [SerializeField]
-    List<Text> menuItems;
+    private Text titleText;
+
+    [SerializeField]
+    private List<Text> menuItems;
 
     int selectedItem;
 
@@ -33,6 +36,8 @@ public class MainMenu : MonoBehaviour
         gameObject.SetActive(true);
         //GameManager.Instance.MainMenu = this;
         UpdateItemSelection();
+
+        SetMenuForStartUp();
     }
 
     public void CloseMenu()
@@ -78,6 +83,30 @@ public class MainMenu : MonoBehaviour
             {
                 menuItems[i].color = Color.black;
             }
+        }
+    }
+
+    private void SetMenuForStartUp()
+    {
+        titleText.color = AnimationUtils.GetZeroAlphaColor(titleText.color);
+
+        foreach(Text text in menuItems)
+        {
+            text.color = new Color(text.color.r, text.color.g, text.color.b, 0);
+        }
+    }
+
+    public IEnumerator DoStartUpAnim()
+    {
+        //SetMenuForStartUp();
+
+        yield return AnimationUtils.FadeTextIn(titleText, 1f);
+
+        yield return new WaitForSeconds(1f);
+
+        foreach (Text text in menuItems)
+        {
+            yield return AnimationUtils.FadeTextIn(text, .5f);
         }
     }
 }

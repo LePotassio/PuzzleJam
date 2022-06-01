@@ -1,10 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public enum GameState { PlayerMove, MoveStandby, MoveResolution, PuzzleSolved, PauseMenu, TitleMenu, SaveMenu, LoadMenu, LoadingScreen, Cutscene };
+public enum GameState { PlayerMove, MoveStandby, MoveResolution, PuzzleSolved, PauseMenu, TitleMenu, SaveMenu, LoadMenu, LoadingScreen, Cutscene, AfterLevelChange };
 
 public enum CameraState { Smooth, Instant, Locked };
 
@@ -29,7 +30,7 @@ public class GameManager : MonoBehaviour
     private MainMenu mainMenu;
 
     [SerializeField]
-    private MainMenu loadMenu;
+    private LoadMenu loadMenu;
 
     [SerializeField]
     private PauseMenu pauseMenu;
@@ -196,9 +197,14 @@ public class GameManager : MonoBehaviour
 
         if (SceneManager.GetActiveScene().name == "MainMenu")
         {
-            State = GameState.TitleMenu;
+            /*State = GameState.TitleMenu;
             MainMenu.OpenMenu();
+            puzzleUI.gameObject.SetActive(false);*/
+            //MainMenu.OpenMenu();
+            pauseMenu.gameObject.SetActive(false);
             puzzleUI.gameObject.SetActive(false);
+
+            StartMainMenu(true);
         } else
         {
             StartCoroutine(UpdateCurrentPuzzleUI());
@@ -208,7 +214,7 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         // This is where all the gameplay handlers will go, certain ones will be called depending on what the gamestate is
-        if ((state != GameState.TitleMenu && state != GameState.LoadMenu) && GameSettings.Instance.GetKeyBindingDown(KeyButtons.PauseResume))
+        if ((state != GameState.TitleMenu && state != GameState.LoadMenu && state != GameState.LoadingScreen) && GameSettings.Instance.GetKeyBindingDown(KeyButtons.PauseResume))
         {
             if (state == GameState.PauseMenu)
                 ResumeGame();
@@ -225,16 +231,16 @@ public class GameManager : MonoBehaviour
         }
         else if (state == GameState.PuzzleSolved)
         {
-            Debug.Log("A winner is you!");
+            //Debug.Log("A winner is you!");
             // You win goes here
             SaveFileProgress.SetLevelStatus(SceneManager.GetActiveScene().name, LevelStatus.Completed);
 
             // Then swap back to level select
             LevelWarp onCompletionWarp = currentPuzzle.OnCompletionWarp;
             if (!onCompletionWarp.OverrideStartingPosition)
-                SwitchLevel(onCompletionWarp.SceneToLoad, null, onCompletionWarp.StartingGamestate);
+                SwitchLevel(onCompletionWarp.SceneToLoad, null);
             else
-                SwitchLevel(onCompletionWarp.SceneToLoad, onCompletionWarp.SinglePositionOverride, onCompletionWarp.StartingGamestate);
+                SwitchLevel(onCompletionWarp.SceneToLoad, onCompletionWarp.SinglePositionOverride);
         }
         else if (state == GameState.TitleMenu)
         {
@@ -255,6 +261,10 @@ public class GameManager : MonoBehaviour
         else if (state == GameState.Cutscene)
         {
             currentCutscene?.DoUpdate();
+        }
+        else if (state == GameState.AfterLevelChange)
+        {
+            state = GameState.PlayerMove;
         }
     }
 
@@ -299,14 +309,14 @@ public class GameManager : MonoBehaviour
     }
 
     // Be very cautious of code after this function where called!
-    public void SwitchLevel(string sceneName, PlayerPositionSave startingPlayerPosOverride = null, GameState stateAfterLoad = GameState.PlayerMove)
+    public void SwitchLevel(string sceneName, PlayerPositionSave startingPlayerPosOverride = null)
     {
         State = GameState.LoadingScreen;
         CameraMode = CameraState.Locked;
-        StartCoroutine(SwitchLevelASync(sceneName, startingPlayerPosOverride, stateAfterLoad));
+        StartCoroutine(SwitchLevelASync(sceneName, startingPlayerPosOverride));
     }
     
-    public IEnumerator SwitchLevelASync(string sceneName, PlayerPositionSave startingPlayerPosOverride = null, GameState stateAfterLoad = GameState.PlayerMove)
+    public IEnumerator SwitchLevelASync(string sceneName, PlayerPositionSave startingPlayerPosOverride = null)
     {
         // Unload old scene
         // Transition and camera enabling/disabling
@@ -317,14 +327,14 @@ public class GameManager : MonoBehaviour
 
         // Load new scene
         //SceneManager.LoadScene(sceneName);
-        yield return LoadSceneWithTransition(sceneName);
+        yield return LoadSceneWithTransition(sceneName, startingPlayerPosOverride, () => { StartCoroutine(UpdateCurrentPuzzleUI()); });
 
-        StartCoroutine(UpdateCurrentPuzzleUI());
-
+        /*
         if (startingPlayerPosOverride != null)
             yield return OverrideStartingPlayerPos(startingPlayerPosOverride);
+        */
 
-        State = stateAfterLoad;
+        State = GameState.AfterLevelChange;
     }
 
     public void ClearGameManager()
@@ -460,20 +470,34 @@ public class GameManager : MonoBehaviour
         RecenterCamera(CameraState.Instant);
     }
 
-    public void StartMainMenu()
+    public void StartMainMenu(bool firstTime = false)
     {
         State = GameState.LoadingScreen;
         CameraMode = CameraState.Locked;
-        StartCoroutine(StartMainMenuAsync());
+        if (!firstTime)
+            StartCoroutine(StartMainMenuAsync());
+        else
+            StartCoroutine(StartMainMenuFirstTimeAsync());
     }
 
     public IEnumerator StartMainMenuAsync()
     {
-        pauseMenu.gameObject.SetActive(false);
-        puzzleUI.gameObject.SetActive(false);
         //SceneManager.LoadScene("MainMenu");
-        yield return LoadSceneWithTransition("MainMenu");
-        MainMenu.OpenMenu();
+        ///mainMenu.gameObject.SetActive(true);
+        yield return LoadSceneWithTransition("MainMenu", null, () => { pauseMenu.gameObject.SetActive(false); puzzleUI.gameObject.SetActive(false); });
+
+        yield return MainMenu.DoStartUpAnim();
+
+        State = GameState.TitleMenu;
+    }
+
+    public IEnumerator StartMainMenuFirstTimeAsync()
+    {
+        //mainMenu.gameObject.SetActive(true);
+        yield return LoadSceneWithTransition("MainMenu", null, null, true);
+
+        yield return MainMenu.DoStartUpAnim();
+
         State = GameState.TitleMenu;
     }
 
@@ -488,10 +512,7 @@ public class GameManager : MonoBehaviour
     {
         saveFileProgress = new SaveFileProgress();
         // SceneManager.LoadScene("Puzzle_Lobby_1");
-        yield return LoadSceneWithTransition(GameSettings.NewGameSceneName);
-        puzzleUI.gameObject.SetActive(true);
-        StartCoroutine(UpdateCurrentPuzzleUI());
-        MainMenu.CloseMenu();
+        yield return LoadSceneWithTransition(GameSettings.NewGameSceneName, null, () => { mainMenu.CloseMenu(); puzzleUI.gameObject.SetActive(true); StartCoroutine(UpdateCurrentPuzzleUI()); });
         State = GameState.PlayerMove;
     }
 
@@ -517,12 +538,7 @@ public class GameManager : MonoBehaviour
         //Temporary until checkpoints
         // SceneManager.LoadScene("Puzzle_Lobby_1");
 
-        yield return LoadSceneWithTransition(saveFileProgress.CheckpointSceneName, new PlayerPositionSave(new Vector2(saveFileProgress.CheckpointSpawnLocation.Item1, saveFileProgress.CheckpointSpawnLocation.Item2)));
-
-        puzzleUI.gameObject.SetActive(true);
-        StartCoroutine(UpdateCurrentPuzzleUI());
-        MainMenu.CloseMenu();
-        loadMenu.CloseMenu();
+        yield return LoadSceneWithTransition(saveFileProgress.CheckpointSceneName, new PlayerPositionSave(new Vector2(saveFileProgress.CheckpointSpawnLocation.Item1, saveFileProgress.CheckpointSpawnLocation.Item2)), () => { mainMenu.CloseMenu(); loadMenu.CloseMenu(); puzzleUI.gameObject.SetActive(true); StartCoroutine(UpdateCurrentPuzzleUI()); });
 
         // Could go into small load flavor here like waking up from resting... (state would need to not be player move initially...)
         State = GameState.PlayerMove;
@@ -620,11 +636,14 @@ public class GameManager : MonoBehaviour
     }
 
 
-    public IEnumerator LoadSceneWithTransition(string newSceneName, PlayerPositionSave posOverride = null)
+    public IEnumerator LoadSceneWithTransition(string newSceneName, PlayerPositionSave posOverride = null, Action middleActions = null, bool skipFadeOut = false)
     {
         // State = GameState.LoadingScreen;
 
-        yield return loadingScreen.OpenLoadingScreen();
+        if (!skipFadeOut)
+            yield return loadingScreen.OpenLoadingScreen();
+        else
+            loadingScreen.gameObject.SetActive(true);
 
         // async load limbo scene
         AsyncOperation loadZoneOp = SceneManager.LoadSceneAsync("LoadingZone");
@@ -649,19 +668,28 @@ public class GameManager : MonoBehaviour
         //SceneManager.UnloadSceneAsync("LoadingZone");
         //newOp.allowSceneActivation = true;
 
+        /*
         if (posOverride != null)
         {
             (float, float) spawnPos = saveFileProgress.CheckpointSpawnLocation;
             startingPlayerRef.transform.position = new Vector3(spawnPos.Item1, spawnPos.Item2, 0);
             startingPlayerRef.GetComponent<MovableSnapAssign>().SnapToCenter();
         }
+        */
 
+        if (posOverride != null)
+        {
+            startingPlayerRef.transform.position = new Vector3(posOverride.SinglePositionOverride.x, posOverride.SinglePositionOverride.y);
+            startingPlayerRef.GetComponent<MovableSnapAssign>().SnapToCenter();
+        }
 
         yield return new WaitForSeconds(.1f); // For letting player get set before camera instant shift (seems iffy, could fail on super slow computers)
         RecenterCamera(CameraState.Instant);
 
         // may need to cache if instant is used consistantly
         CameraMode = CameraState.Smooth;
+
+        middleActions?.Invoke();
 
         yield return loadingScreen.CloseLoadingScreen();
 

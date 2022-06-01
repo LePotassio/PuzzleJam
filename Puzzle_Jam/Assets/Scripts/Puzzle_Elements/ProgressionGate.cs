@@ -5,6 +5,9 @@ using UnityEngine;
 public class ProgressionGate : MonoBehaviour
 {
     [SerializeField]
+    string gateName = "default";
+
+    [SerializeField]
     private RequiredLevelCompletions requiredLevelCompletions;
 
     [SerializeField]
@@ -31,11 +34,14 @@ public class ProgressionGate : MonoBehaviour
         if (requiredLevelCompletions.IsSatisfied())
         {
             // Get rid of the barrier (could do first time animation of getting rid of it... adda a cam box and set temporarily?)
-            StartCoroutine(RemoveGate());
+            if (GameManager.Instance.SaveFileProgress.GetGateStatus(gateName) == GateStatus.Locked)
+                StartCoroutine(RemoveGateWithAnim());
+            else
+                RemoveGateWithoutAnim();
         }
     }
 
-    private IEnumerator RemoveGate()
+    private IEnumerator RemoveGateWithAnim()
     {
         yield return new WaitUntil(() => GameManager.Instance.State == GameState.PlayerMove);
         GameManager.Instance.State = GameState.Cutscene;
@@ -56,7 +62,15 @@ public class ProgressionGate : MonoBehaviour
         if (mode == CameraState.Instant)
             GameManager.Instance.RecenterCamera(CameraState.Instant);
         yield return new WaitForSeconds(camTimeFromGate);
-        
+
+        GameManager.Instance.SaveFileProgress.SetGateStatus(gateName, GateStatus.Unlocked);
+
         GameManager.Instance.State = GameState.PlayerMove;
+    }
+
+    private void RemoveGateWithoutAnim()
+    {
+        pe.RemoveElementFromCurrentTile();
+        gameObject.GetComponentInChildren<SpriteRenderer>().gameObject.SetActive(false);
     }
 }

@@ -6,6 +6,7 @@ using UnityEngine.SceneManagement;
 
 public enum LevelStatus { New, Started, Completed }
 public enum CutsceneStatus { Unwatched, Watched }
+public enum GateStatus { Locked, Unlocked}
 [System.Serializable]
 public class SaveFileProgress
 {
@@ -20,6 +21,8 @@ public class SaveFileProgress
     private Dictionary<string, LevelStatus> levelCompletions;
 
     private Dictionary<string, CutsceneStatus> cutsceneCompletions;
+
+    private Dictionary<string, GateStatus> gateCompletions;
 
     public string CheckpointSceneName
     {
@@ -41,6 +44,11 @@ public class SaveFileProgress
         get { return cutsceneCompletions; }
     }
 
+    public Dictionary<string, GateStatus> GateCompletions
+    {
+        get { return gateCompletions; }
+    }
+
     public void SetCheckpoint(string newCheckpointScene, Vector2 newSpawnLocation)
     {
         checkpointSceneName = newCheckpointScene;
@@ -51,6 +59,7 @@ public class SaveFileProgress
     {
         levelCompletions = new Dictionary<string, LevelStatus>();
         cutsceneCompletions = new Dictionary<string, CutsceneStatus>();
+        gateCompletions = new Dictionary<string, GateStatus>();
         checkpointSceneName = GameSettings.NewGameSceneName;
         checkpointSpawnLocation = (-3.5f, -.5f);
         // Unless there is a save file... Or rather check loaded list from file for scene name... Or just do it after...
@@ -99,5 +108,21 @@ public class SaveFileProgress
             cutsceneCompletions[cutsceneName] = newStatus;
         else
             cutsceneCompletions.Add(cutsceneName, CutsceneStatus.Watched);
+    }
+
+    public GateStatus GetGateStatus(string gateName)
+    {
+        if (gateCompletions.ContainsKey(gateName))
+            return gateCompletions[gateName];
+        else
+            return GateStatus.Locked;
+    }
+
+    public void SetGateStatus(string gateName, GateStatus newStatus)
+    {
+        if (gateCompletions.ContainsKey(gateName))
+            gateCompletions[gateName] = newStatus;
+        else
+            gateCompletions.Add(gateName, GateStatus.Unlocked);
     }
 }

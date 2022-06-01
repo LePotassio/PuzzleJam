@@ -31,6 +31,8 @@ public class GameSettings : MonoBehaviour
 
     public static float CutsceneSlideFadeSpeed = 1f;
 
+    public static float TransitionFadeSpeed = 1f;
+
     // KeyControls
 
     private static Dictionary<KeyButtons, List<KeyCode>> BindDict = new Dictionary<KeyButtons, List<KeyCode>>

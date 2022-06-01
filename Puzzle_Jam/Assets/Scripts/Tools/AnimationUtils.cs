@@ -49,5 +49,15 @@ public static class AnimationUtils
         }
         txt.color = new Color(txt.color.r, txt.color.g, txt.color.b, 0f);
     }
+
+    public static Color GetZeroAlphaColor(Color c)
+    {
+        return new Color(c.r, c.g, c.b, 0);
+    }
+
+    public static Color GetFullAlphaColor(Color c)
+    {
+        return new Color(c.r, c.g, c.b, 1f);
+    }
     // Helpers
 }
