@@ -5,6 +5,9 @@ using UnityEngine;
 public class CamBox : MonoBehaviour
 {
     [SerializeField]
+    private bool disableOnEnter = false;
+
+    [SerializeField]
     private GameObject camPos;
 
     [SerializeField]
@@ -39,6 +42,8 @@ public class CamBox : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        if (disableOnEnter)
+            return;
         PlayerMovement m = collision.GetComponent<PlayerMovement>();
         if (m && m.StartingPlayer)
         {

@@ -17,6 +17,9 @@ public class Cutscene : MonoBehaviour
     // Could do something like start a coroutine of all of these and wait for each to finish (and allow player to skip text typing?)
 
     [SerializeField]
+    private RequiredLevelCompletions requiredLevelCompletions;
+
+    [SerializeField]
     private bool ignoreWatched = false;
 
     [SerializeField]
@@ -101,6 +104,9 @@ public class Cutscene : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        if (!requiredLevelCompletions.IsSatisfied())
+            return;
+
         PlayerMovement playerMovement = collision.GetComponent<PlayerMovement>();
         if (playerMovement && playerMovement == GameManager.Instance.StartingPlayerRef)
         {// Cover the screen here with anim

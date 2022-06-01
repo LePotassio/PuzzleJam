@@ -5,35 +5,58 @@ using UnityEngine;
 public class ProgressionGate : MonoBehaviour
 {
     [SerializeField]
-    private List<string> levelsCompletionsRequired;
+    private RequiredLevelCompletions requiredLevelCompletions;
 
     [SerializeField]
-    private int requirementLax;
+    private CameraState mode = CameraState.Smooth;
+
+    [SerializeField]
+    private float camTimeToGate = 3f;
+
+    [SerializeField]
+    private float timeAfterUnlockAnimation = 2f;
+
+    [SerializeField]
+    private float camTimeFromGate = 3f;
 
     [SerializeField]
     Puzzle_Element pe;
 
+    [SerializeField]
+    CamBox gateCamBox;
+
     private void Start()
     {
         // Check for completions
-        int completed = CountRequiredCompletions();
-        if (completed == levelsCompletionsRequired.Count - requirementLax)
+        if (requiredLevelCompletions.IsSatisfied())
         {
             // Get rid of the barrier (could do first time animation of getting rid of it... adda a cam box and set temporarily?)
-            pe.RemoveElementFromCurrentTile();
-            gameObject.SetActive(false);
+            StartCoroutine(RemoveGate());
         }
     }
 
-    private int CountRequiredCompletions()
+    private IEnumerator RemoveGate()
     {
-        SaveFileProgress sf = GameManager.Instance.SaveFileProgress;
-        int res = 0;
-        foreach (var level in levelsCompletionsRequired)
-        {
-            if (sf.GetLevelStatus(level) == LevelStatus.Completed)
-                res++;
-        }
-        return res;
+        yield return new WaitUntil(() => GameManager.Instance.State == GameState.PlayerMove);
+        GameManager.Instance.State = GameState.Cutscene;
+
+        GameManager.Instance.CurrentCamBoxes.Add(gateCamBox);
+        if (mode == CameraState.Instant)
+            GameManager.Instance.RecenterCamera(CameraState.Instant);
+        yield return new WaitForSeconds(camTimeToGate);
+
+        pe.RemoveElementFromCurrentTile();
+        //gameObject.SetActive(false);
+        gameObject.GetComponentInChildren<SpriteRenderer>().gameObject.SetActive(false);
+
+        yield return new WaitForSeconds(timeAfterUnlockAnimation);
+
+        GameManager.Instance.CurrentCamBoxes.Remove(gateCamBox);
+        
+        if (mode == CameraState.Instant)
+            GameManager.Instance.RecenterCamera(CameraState.Instant);
+        yield return new WaitForSeconds(camTimeFromGate);
+        
+        GameManager.Instance.State = GameState.PlayerMove;
     }
 }

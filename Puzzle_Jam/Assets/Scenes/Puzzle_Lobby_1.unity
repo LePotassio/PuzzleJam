@@ -1684,6 +1684,7 @@ GameObject:
   - component: {fileID: 2897113835401366185}
   - component: {fileID: 2216055169069029652}
   - component: {fileID: 2146629839876536362}
+  - component: {fileID: 2146629839876536363}
   m_Layer: 0
   m_Name: ProgressionGate
   m_TagString: Untagged
@@ -1703,10 +1704,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b5f32e90b71126488043cd13b1561cf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  levelsCompletionsRequired:
-  - Puzzle_0-1
-  requirementLax: 0
+  requiredLevelCompletions:
+    levelList:
+    - Puzzle_0-1
+    requirementLax: 0
+  mode: 0
+  camTimeToGate: 3
+  timeAfterUnlockAnimation: 2
+  camTimeFromGate: 3
   pe: {fileID: 2216055169069029652}
+  gateCamBox: {fileID: 2146629839876536363}
+--- !u!114 &2146629839876536363
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2146629839876536361}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb9c7220518f52c42b6c73fb87cb6abe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  disableOnEnter: 1
+  camPos: {fileID: 0}
+  precedence: 999
+  camSize: 5
 --- !u!114 &2216055169069029652
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2164,6 +2187,14 @@ PrefabInstance:
     - target: {fileID: 7711414512614711898, guid: a674c2378610c2f43a40be5f83527ec7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7711414512614711899, guid: a674c2378610c2f43a40be5f83527ec7, type: 3}
+      propertyPath: requiredLevelCompletions.levelList.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7711414512614711899, guid: a674c2378610c2f43a40be5f83527ec7, type: 3}
+      propertyPath: requiredLevelCompletions.levelList.Array.data[0]
+      value: Puzzle_0-1
       objectReference: {fileID: 0}
     - target: {fileID: 7711414512614711908, guid: a674c2378610c2f43a40be5f83527ec7, type: 3}
       propertyPath: m_Name
