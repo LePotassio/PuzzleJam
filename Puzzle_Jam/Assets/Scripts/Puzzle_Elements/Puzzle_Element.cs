@@ -98,4 +98,21 @@ public class Puzzle_Element : MonoBehaviour
 
         return true;
     }
+
+    public void RemoveElementFromCurrentTile()
+    {
+        var colliders = Physics2D.OverlapCircleAll(transform.position, 0.15f, GameLayers.Instance.TileLayer);
+        if (colliders.Length == 0)
+            return;
+        GridTile tile = colliders[0].GetComponent<GridTile>();
+
+        Movable m = GetComponent<Movable>();
+        Puzzle_Element pz = gameObject.GetComponent<Puzzle_Element>();
+
+        if (m.CurrentTile)
+            m.CurrentTile.Contents.Remove(pz);
+
+        m.CurrentTile = null;
+        pz.CurrentTile = null;
+    }
 }
