@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+public enum CutsceneState { Waiting, Busy }
+
 public class Cutscene : MonoBehaviour
 {
     // List of images?
@@ -24,18 +26,45 @@ public class Cutscene : MonoBehaviour
     private Text cutsceneText;
 
     [SerializeField]
+    private Image cutsceneSlideBackground;
+
+    [SerializeField]
     private string cutsceneName;
 
     [SerializeField]
     private List<CutsceneStep> steps;
 
+    [SerializeField]
+    private CutsceneState state = CutsceneState.Waiting;
+
     private int currentStep;
 
     private Action afterCutscene;
 
+    public Image CutsceneSlideBackground
+    {
+        get { return cutsceneSlideBackground; }
+    }
+
+    public Image CutsceneSlide
+    {
+        get { return cutsceneSlide; }
+    }
+
+    public Text CutsceneText
+    {
+        get { return cutsceneText; }
+    }
+
+    public CutsceneState State
+    {
+        get { return state;}
+        set { state = value; }
+    }
+
     public void DoUpdate()
     {
-        if (GameSettings.Instance.GetKeyBindingDown(KeyButtons.AdvanceCutscene))
+        if (GameSettings.Instance.GetKeyBindingDown(KeyButtons.AdvanceCutscene) && state == CutsceneState.Waiting)
         {
             AdvanceCutscene();
         }
@@ -51,10 +80,11 @@ public class Cutscene : MonoBehaviour
         // Remember to set state to cutscene before
         currentStep = 0;
         cutsceneCanvas.SetActive(true);
+        cutsceneText.text = "";
 
         this.afterCutscene = afterCutscene;
 
-        StartCoroutine(steps[0].DoCutsceneStep(cutsceneSlide));
+        steps[0].DoCutsceneStep(this);
 
         /*foreach (CutsceneStep step in steps)
         {
@@ -81,15 +111,16 @@ public class Cutscene : MonoBehaviour
     public void AdvanceCutscene()
     {
         currentStep++;
-        Debug.Log(currentStep);
         if (currentStep >= steps.Count)
         {
             afterCutscene.Invoke();
+            cutsceneSlide.sprite = null;
+            //state = CutsceneState.Waiting;
             cutsceneCanvas.SetActive(false);
         }
         else
         {
-            StartCoroutine(steps[currentStep].DoCutsceneStep(cutsceneSlide));
+            steps[currentStep].DoCutsceneStep(this);
         }
     }
 
@@ -97,4 +128,59 @@ public class Cutscene : MonoBehaviour
     {
         p.SetCutsceneStatus(cutsceneName, CutsceneStatus.Watched);
     }
+
+    public IEnumerator FadeImgIn(Image img, float speed)
+    {
+        img.color = new Color(img.color.r, img.color.g, img.color.b, 0);
+        while (img.color.a < 1.0f)
+        {
+            img.color = new Color(img.color.r, img.color.g, img.color.b, img.color.a + (Time.deltaTime / speed));
+            yield return null;
+        }
+        img.color = new Color(img.color.r, img.color.g, img.color.b, 1.0f);
+    }
+
+    /*public IEnumerator FadeImgOut(Image img, float speed)
+    {
+        img.color = new Color(img.color.r, img.color.g, img.color.b, 1);
+        while (img.color.a > 0f)
+        {
+            img.color = new Color(img.color.r, img.color.g, img.color.b, img.color.a - (Time.deltaTime / speed));
+            yield return null;
+        }
+        img.color = new Color(img.color.r, img.color.g, img.color.b, 0f);
+    }
+
+    public IEnumerator FadeTextIn(Text txt, float speed)
+    {
+        txt.color = new Color(txt.color.r, txt.color.g, txt.color.b, 0);
+        while (txt.color.a < 1.0f)
+        {
+            txt.color = new Color(txt.color.r, txt.color.g, txt.color.b, txt.color.a + (Time.deltaTime / speed));
+            yield return null;
+        }
+        txt.color = new Color(txt.color.r, txt.color.g, txt.color.b, 1.0f);
+    }
+
+    public IEnumerator FadeTextOut(Text txt, float speed)
+    {
+        txt.color = new Color(txt.color.r, txt.color.g, txt.color.b, 1);
+        while (txt.color.a > 0f)
+        {
+            txt.color = new Color(txt.color.r, txt.color.g, txt.color.b, txt.color.a - (Time.deltaTime / speed));
+            yield return null;
+        }
+        txt.color = new Color(txt.color.r, txt.color.g, txt.color.b, 0f);
+    }*/
+
+    /*
+    public IEnumerator EndCutscene()
+    {
+        if (cutsceneSlide.im)
+
+        afterCutscene.Invoke();
+        cutsceneSlide.sprite = null;
+        //state = CutsceneState.Waiting;
+        cutsceneCanvas.SetActive(false);
+    }*/
 }

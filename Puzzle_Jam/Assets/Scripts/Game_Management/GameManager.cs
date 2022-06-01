@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public enum GameState { PlayerMove, MoveStandby, MoveResolution, PuzzleSolved, PauseMenu, TitleMenu, SaveMenu, LoadMenu, LoadingScreen, Cutscene };
 
@@ -673,4 +674,5 @@ public class GameManager : MonoBehaviour
         currentCutscene = cutscene;
         cutscene.DoCutscene(() => { State = temp; currentCutscene = null; cutscene.MarkCutsceneWatched(saveFileProgress); if (temp == GameState.MoveResolution && queuedMoves.Count == 0) State = GameState.PlayerMove; });
     }
+
 }

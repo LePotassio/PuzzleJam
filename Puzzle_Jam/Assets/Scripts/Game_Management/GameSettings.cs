@@ -28,6 +28,9 @@ public class GameSettings : MonoBehaviour
 
     public static string NewGameSceneName = "Puzzle_Lobby_1";
 
+
+    public static float CutsceneSlideFadeSpeed = 1f;
+
     // KeyControls
 
     private static Dictionary<KeyButtons, List<KeyCode>> BindDict = new Dictionary<KeyButtons, List<KeyCode>>
