@@ -50,7 +50,7 @@ public class CamBox : MonoBehaviour
             // Recenter camera
             // Debug.Log("Recentering");
             //GameManager.Instance.RecenterCamera(camPos);
-            GameManager.Instance.CurrentCamBoxes.Add(this);
+            GameManager.Instance.CurrentCamBoxes.Insert(0, this);
         } 
     }
 

@@ -11,6 +11,9 @@ public class ProgressionGate : MonoBehaviour
     private RequiredLevelCompletions requiredLevelCompletions;
 
     [SerializeField]
+    private bool UnlockOnSceneChange = true;
+
+    [SerializeField]
     private CameraState mode = CameraState.Smooth;
 
     [SerializeField]
@@ -30,12 +33,22 @@ public class ProgressionGate : MonoBehaviour
 
     private void Start()
     {
+        if (UnlockOnSceneChange)
+            DoGateCheck();
+        else if (GameManager.Instance.SaveFileProgress.GetGateStatus(gateName) == GateStatus.Unlocked)
+            RemoveGateWithoutAnim();
+    }
+    
+    public void DoGateCheck()
+    {
         // Check for completions
         if (requiredLevelCompletions.IsSatisfied())
         {
             // Get rid of the barrier (could do first time animation of getting rid of it... adda a cam box and set temporarily?)
             if (GameManager.Instance.SaveFileProgress.GetGateStatus(gateName) == GateStatus.Locked)
+            {
                 StartCoroutine(RemoveGateWithAnim());
+            }
             else
                 RemoveGateWithoutAnim();
         }
