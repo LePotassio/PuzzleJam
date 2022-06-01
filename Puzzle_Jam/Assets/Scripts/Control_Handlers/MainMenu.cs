@@ -28,21 +28,24 @@ public class MainMenu : MonoBehaviour
     private void Start()
     {
         menuItems = buttonHolder.GetComponentsInChildren<Text>().ToList();
-        OpenMenu();
+        OpenMenu(true);
     }
 
-    public void OpenMenu()
+    public void OpenMenu(bool setupIntro)
     {
-        gameObject.SetActive(true);
+        titleText.gameObject.SetActive(true);
+        buttonHolder.SetActive(true);
         //GameManager.Instance.MainMenu = this;
         UpdateItemSelection();
-
-        SetMenuForStartUp();
+        if (setupIntro)
+            SetMenuForStartUp();
     }
 
     public void CloseMenu()
     {
-        gameObject.SetActive(false);
+        //gameObject.SetActive(false);
+        titleText.gameObject.SetActive(false);
+        buttonHolder.SetActive(false);
     }
 
     public void DoUpdate()

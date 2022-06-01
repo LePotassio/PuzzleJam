@@ -143,7 +143,7 @@ GameObject:
   - component: {fileID: 409235902350760220}
   - component: {fileID: 8182015147144226216}
   - component: {fileID: 8218455465476819479}
-  - component: {fileID: 5573615253576794476}
+  - component: {fileID: 8228067252454619815}
   m_Layer: 5
   m_Name: SaveCanvas
   m_TagString: Untagged
@@ -233,7 +233,7 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
---- !u!114 &5573615253576794476
+--- !u!114 &8228067252454619815
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -242,7 +242,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 574547454724605175}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 263dd724b1cdcd145b83c699e9959017, type: 3}
+  m_Script: {fileID: 11500000, guid: 7b82f35b12561b740bc06a4420c34458, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   menuItems: []
@@ -620,6 +620,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   saveSlot: 1
+  slotText: {fileID: 5799721831201717349}
 --- !u!1 &1024537285918723848
 GameObject:
   m_ObjectHideFlags: 0
@@ -942,6 +943,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   saveSlot: 2
+  slotText: {fileID: 7204639407961125122}
 --- !u!1 &1607174987757830958
 GameObject:
   m_ObjectHideFlags: 0
@@ -1418,7 +1420,7 @@ MonoBehaviour:
   mainMenu: {fileID: 8739296260675127693}
   loadMenu: {fileID: 8546118862098950294}
   pauseMenu: {fileID: 8534693795231300731}
-  saveMenu: {fileID: 5573615253576794476}
+  saveMenu: {fileID: 8228067252454619815}
   loadingScreen: {fileID: 8345497644920268022}
   puzzleUI: {fileID: 1612912358197791945}
   interactionModeUI: {fileID: 5526712704231150355}
@@ -3065,6 +3067,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   saveSlot: 2
+  slotText: {fileID: 967815371653229248}
 --- !u!1 &7221547919701435568
 GameObject:
   m_ObjectHideFlags: 0
@@ -3639,6 +3642,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   saveSlot: 3
+  slotText: {fileID: 8142296594069138864}
 --- !u!1 &8440935039039883071
 GameObject:
   m_ObjectHideFlags: 0
@@ -3656,7 +3660,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &4024765505230580444
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3886,6 +3890,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   saveSlot: 3
+  slotText: {fileID: 6205716784187497353}
 --- !u!1 &8914273014847600389
 GameObject:
   m_ObjectHideFlags: 0
@@ -4033,3 +4038,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   saveSlot: 1
+  slotText: {fileID: 4245053201439504444}

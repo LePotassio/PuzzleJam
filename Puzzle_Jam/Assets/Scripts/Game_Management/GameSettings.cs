@@ -33,6 +33,21 @@ public class GameSettings : MonoBehaviour
 
     public static float TransitionFadeSpeed = 1f;
 
+
+    public static string SaveFileStart = "/save";
+
+    public static string SaveFileEnd = ".frz";
+
+    public static string GetSaveFilePath(int saveSlot)
+    {
+        return Application.persistentDataPath + GetSaveFileName(saveSlot);
+    }
+
+    public static string GetSaveFileName(int saveSlot)
+    {
+        return SaveFileStart + saveSlot + SaveFileEnd;
+    }
+
     // KeyControls
 
     private static Dictionary<KeyButtons, List<KeyCode>> BindDict = new Dictionary<KeyButtons, List<KeyCode>>

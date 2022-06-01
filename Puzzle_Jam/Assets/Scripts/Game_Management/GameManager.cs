@@ -36,7 +36,7 @@ public class GameManager : MonoBehaviour
     private PauseMenu pauseMenu;
 
     [SerializeField]
-    private PauseMenu saveMenu;
+    private SaveMenu saveMenu;
 
     [SerializeField]
     private LoadingScreen loadingScreen;
@@ -484,7 +484,7 @@ public class GameManager : MonoBehaviour
     {
         //SceneManager.LoadScene("MainMenu");
         ///mainMenu.gameObject.SetActive(true);
-        yield return LoadSceneWithTransition("MainMenu", null, () => { pauseMenu.gameObject.SetActive(false); puzzleUI.gameObject.SetActive(false); });
+        yield return LoadSceneWithTransition("MainMenu", null, () => { pauseMenu.gameObject.SetActive(false); puzzleUI.gameObject.SetActive(false); mainMenu.OpenMenu(true); });
 
         yield return MainMenu.DoStartUpAnim();
 
@@ -555,6 +555,7 @@ public class GameManager : MonoBehaviour
     public void OpenLoadMenu()
     {
         loadMenu.OpenMenu();
+        mainMenu.CloseMenu();
         pausedStateCache = State;
         State = GameState.LoadMenu;
     }
@@ -562,6 +563,7 @@ public class GameManager : MonoBehaviour
     public void CloseLoadMenu()
     {
         State = pausedStateCache;
+        mainMenu.OpenMenu(false);
         loadMenu.gameObject.SetActive(false);
     }
 

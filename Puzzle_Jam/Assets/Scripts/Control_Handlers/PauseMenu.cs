@@ -14,6 +14,11 @@ public class PauseMenu : MonoBehaviour
 
     int selectedItem;
 
+    public List<Text> MenuItems
+    {
+        get { return menuItems; }
+    }
+
     private void Awake()
     {
         selectedItem = 0;

@@ -9,7 +9,8 @@ public static class SaveSystem
     public static void SaveProgress(int saveSlot)
     {
         BinaryFormatter formatter = new BinaryFormatter();
-        string path = Application.persistentDataPath + "/save" + saveSlot + ".frz";
+        //string path = Application.persistentDataPath + "/save" + saveSlot + ".frz";
+        string path = GameSettings.GetSaveFilePath(saveSlot);
         FileStream stream = new FileStream(path, FileMode.Create);
 
         formatter.Serialize(stream, GameManager.Instance.SaveFileProgress);

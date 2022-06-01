@@ -31,6 +31,11 @@ public class LoadMenu : MonoBehaviour
     public void OpenMenu()
     {
         gameObject.SetActive(true);
+        foreach (Text slotText in menuItems)
+        {
+            LoadFromSlotMenuItem mi = slotText.GetComponent<LoadFromSlotMenuItem>();
+            mi?.UpdateSlotUI();
+        }
         UpdateItemSelection();
     }
 
@@ -75,7 +80,11 @@ public class LoadMenu : MonoBehaviour
             }
             else
             {
-                menuItems[i].color = Color.black;
+                LoadFromSlotMenuItem s = menuItems[i].GetComponent<LoadFromSlotMenuItem>();
+                if (s)
+                    menuItems[i].color = s.SetColor;
+                else
+                    menuItems[i].color = Color.black;
             }
         }
     }
