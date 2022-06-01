@@ -17,6 +17,9 @@ public class Cutscene : MonoBehaviour
     // Could do something like start a coroutine of all of these and wait for each to finish (and allow player to skip text typing?)
 
     [SerializeField]
+    private bool ignoreWatched = false;
+
+    [SerializeField]
     private GameObject cutsceneCanvas;
 
     [SerializeField]
@@ -100,8 +103,8 @@ public class Cutscene : MonoBehaviour
     {
         PlayerMovement playerMovement = collision.GetComponent<PlayerMovement>();
         if (playerMovement && playerMovement == GameManager.Instance.StartingPlayerRef)
-        {
-            if (GameManager.Instance.SaveFileProgress.GetCutsceneStatus(cutsceneName) == CutsceneStatus.Unwatched)
+        {// Cover the screen here with anim
+            if (GameManager.Instance.SaveFileProgress.GetCutsceneStatus(cutsceneName) == CutsceneStatus.Unwatched || ignoreWatched)
             {
                 GameManager.Instance.StartCutscene(this);
             }
