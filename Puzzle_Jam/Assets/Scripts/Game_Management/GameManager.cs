@@ -470,6 +470,7 @@ public class GameManager : MonoBehaviour
     public IEnumerator StartMainMenuAsync()
     {
         pauseMenu.gameObject.SetActive(false);
+        puzzleUI.gameObject.SetActive(false);
         //SceneManager.LoadScene("MainMenu");
         yield return LoadSceneWithTransition("MainMenu");
         MainMenu.OpenMenu();
