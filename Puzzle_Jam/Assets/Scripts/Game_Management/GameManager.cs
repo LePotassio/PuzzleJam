@@ -91,6 +91,8 @@ public class GameManager : MonoBehaviour
     // Cutscene Stuff
     
     private Cutscene currentCutscene;
+
+    private bool waitingForGate = false;
     
 
     public List<PlayerMovement> PlayerMovements
@@ -177,6 +179,12 @@ public class GameManager : MonoBehaviour
         get { return currentCutscene; }
     }
 
+    public bool WaitingForGate
+    {
+        get { return waitingForGate; }
+        set { waitingForGate = value; }
+    }
+
     private void Awake()
     {
         buildSceneCount = SceneManager.sceneCountInBuildSettings;
@@ -223,7 +231,7 @@ public class GameManager : MonoBehaviour
             else
                 PauseGame();
         }
-        else if (state == GameState.PlayerMove)
+        else if (state == GameState.PlayerMove && !waitingForGate)
         {
             interactionHandler.DoUpdate();
             foreach (PlayerMovement pm in player_movements)

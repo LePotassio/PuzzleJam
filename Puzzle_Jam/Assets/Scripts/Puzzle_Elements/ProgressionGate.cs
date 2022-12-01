@@ -56,8 +56,10 @@ public class ProgressionGate : MonoBehaviour
 
     private IEnumerator RemoveGateWithAnim()
     {
+        GameManager.Instance.WaitingForGate = true;
         yield return new WaitUntil(() => GameManager.Instance.State == GameState.PlayerMove);
         GameManager.Instance.State = GameState.Cutscene;
+        GameManager.Instance.WaitingForGate = false;
 
         GameManager.Instance.CurrentCamBoxes.Add(gateCamBox);
         if (mode == CameraState.Instant)
